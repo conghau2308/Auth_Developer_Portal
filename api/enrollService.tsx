@@ -12,8 +12,8 @@ export interface ICreateClientDto {
  * Dữ liệu NHẬN về (khớp với ClientSecretDto trong backend)
  */
 export interface IClientSecretDto {
-  clientId: string;
-  clientSecret: string;
+  client_id: string;
+  client_secret: string;
 }
 
 /**
@@ -41,7 +41,6 @@ export const registerClientService = async (
   }
 };
 
-
 /**
  * Service đăng nhập demo CHỈ VỚI USERNAME
  */
@@ -62,5 +61,59 @@ export const demoLoginService = async (username: string): Promise<boolean> => {
   } catch (error: unknown) {
     console.error("❌ Demo login failed:", error);
     return false;
+  }
+};
+
+export const userLogin = async (
+  username: string
+): Promise<{ success: boolean; message: string } | null> => {
+  try {
+    const response = await axios.post(
+      `http://localhost:8080/face-auth/verify/${username}`,
+      {}, // ✅ Body rỗng (endpoint này không cần body)
+      {
+        withCredentials: true, // ✅ ĐÚNG: nằm trong config (tham số thứ 3)
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("✅ Login response:", response);
+    console.log("✅ Response headers:", response.headers);
+
+    if (response) {
+      return response.data;
+    }
+    return null;
+  } catch (error) {
+    console.error("❌ User authenticate failed:", error);
+    return null;
+  }
+};
+
+export const userEnrollService = async (
+  username: string,
+  name: string,
+  email: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await axios.post<{ success: boolean; message: string }>(
+      "http://localhost:8080/face-auth/enroll",
+      { username, name, email },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error("❌ Enroll failed:", error.response?.data);
+      throw new Error(error.response?.data?.message || "Enroll failed");
+    }
+    console.error("❌ Unexpected error:", error);
+    throw new Error("Enroll failed");
   }
 };
