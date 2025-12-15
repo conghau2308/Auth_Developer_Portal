@@ -1,7 +1,8 @@
 import axios, { AxiosResponse } from "axios";
+import { API_BASE_URL } from "@/config/api";
 
 /**
- * Dữ liệu GỬI đi (khớp với CreateClientDto trong backend)
+ * Dữ liệu GỬI đi
  */
 export interface ICreateClientDto {
   appName: string;
@@ -9,111 +10,141 @@ export interface ICreateClientDto {
 }
 
 /**
- * Dữ liệu NHẬN về (khớp với ClientSecretDto trong backend)
+ * Dữ liệu NHẬN về
  */
 export interface IClientSecretDto {
   client_id: string;
   client_secret: string;
 }
 
-/**
- * Service đăng ký client với Authorization Server
- */
+export interface IUserInfor {
+  username: string;
+  name: string;
+  email: string;
+}
+
+/* ===================== CLIENT ENROLL ===================== */
+
 export const registerClientService = async (
   clientData: ICreateClientDto
 ): Promise<IClientSecretDto> => {
+  const response: AxiosResponse<IClientSecretDto> = await axios.post(
+    `${API_BASE_URL}/portal/api/v1/enroll`,
+    clientData,
+    {
+      withCredentials: true,
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  return response.data;
+};
+
+/* ===================== AUTH ===================== */
+
+export const getAccessTokenByRefreshToken = async (): Promise<{
+  success: boolean;
+  message: string;
+}> => {
   try {
-    const response: AxiosResponse<IClientSecretDto> = await axios.post(
-      `http://localhost:8080/portal/api/v1/enroll`,
-      clientData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      }
+    const response = await axios.post(
+      `${API_BASE_URL}/face-auth/refresh`,
+      {},
+      { withCredentials: true }
     );
 
     return response.data;
-  } catch (error: unknown) {
-    console.error("❌ Register client failed:", error);
-    throw new Error("Register client failed");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "Refresh failed",
+    };
   }
 };
 
-/**
- * Service đăng nhập demo CHỈ VỚI USERNAME
- */
-export const demoLoginService = async (username: string): Promise<boolean> => {
+export const getUserInfor = async (): Promise<{
+  data: IUserInfor | null;
+  success: boolean;
+  message: string;
+}> => {
   try {
-    await axios.post(
-      `http://localhost:8080/portal/demo-login`,
-      { username: username }, // Gửi DTO chỉ có username
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true, // Rất quan trọng để NHẬN cookie
-      }
+    const response = await axios.get(`${API_BASE_URL}/face-auth/me`, {
+      withCredentials: true,
+    });
+
+    return response.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "Get user info failed",
+      data: null,
+    };
+  }
+};
+
+export const userLogout = async (): Promise<{
+  success: boolean;
+  message: string;
+}> => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/face-auth/logout`,
+      {},
+      { withCredentials: true }
     );
-    // Nếu request thành công (không ném lỗi), xem như login OK
-    return true;
-  } catch (error: unknown) {
-    console.error("❌ Demo login failed:", error);
-    return false;
+
+    return response.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "Logout failed",
+    };
   }
 };
 
 export const userLogin = async (
-  username: string
-): Promise<{ success: boolean; message: string } | null> => {
+  username: string,
+  imageBase64: string
+): Promise<{ success: boolean; message: string }> => {
   try {
     const response = await axios.post(
-      `http://localhost:8080/face-auth/verify/${username}`,
-      {}, // ✅ Body rỗng (endpoint này không cần body)
-      {
-        withCredentials: true, // ✅ ĐÚNG: nằm trong config (tham số thứ 3)
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+      `${API_BASE_URL}/face-auth/verify/${username}`,
+      { image_b64: imageBase64 },
+      { withCredentials: true }
     );
-    console.log("✅ Login response:", response);
-    console.log("✅ Response headers:", response.headers);
 
-    if (response) {
-      return response.data;
-    }
-    return null;
-  } catch (error) {
-    console.error("❌ User authenticate failed:", error);
-    return null;
+    return response.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "Verify failed",
+    };
   }
 };
 
 export const userEnrollService = async (
   username: string,
   name: string,
-  email: string
+  email: string,
+  imageBase64: string
 ): Promise<{ success: boolean; message: string }> => {
   try {
-    const response = await axios.post<{ success: boolean; message: string }>(
-      "http://localhost:8080/face-auth/enroll",
-      { username, name, email },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+    const response = await axios.post(
+      `${API_BASE_URL}/face-auth/enroll`,
+      { username, name, email, image_b64: imageBase64 },
+      { headers: { "Content-Type": "application/json" } }
     );
 
     return response.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      console.error("❌ Enroll failed:", error.response?.data);
-      throw new Error(error.response?.data?.message || "Enroll failed");
-    }
-    console.error("❌ Unexpected error:", error);
-    throw new Error("Enroll failed");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "Enroll failed",
+    };
   }
 };

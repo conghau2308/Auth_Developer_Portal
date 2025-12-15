@@ -1,6 +1,10 @@
 "use client";
 
 import { registerClientService } from "@/api/enrollService";
+import Footer from "@/components/layout/footer";
+import Header from "@/components/layout/header";
+import { ReadonlyField } from "@/components/layout/normal-field";
+import { SecretField } from "@/components/layout/secret-field";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +23,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Lock } from "lucide-react";
 import { useState } from "react";
 
 const Enroll = () => {
@@ -30,6 +33,9 @@ const Enroll = () => {
     client_secret: string;
   } | null>(null);
   const [open, setOpen] = useState<boolean>(false);
+  const authorizationEndpoint =
+    process.env.NEXT_PUBLIC_OAUTH_AUTHORIZATION_ENDPOINT ||
+    "http://localhost:3000/oauth/signin";
 
   const handleEnroll = async () => {
     try {
@@ -50,35 +56,9 @@ const Enroll = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      {/* --- HEADER / NAVBAR --- */}
-      <header className="px-6 py-4 flex items-center justify-between bg-white border-b border-slate-200">
-        <div className="flex items-center gap-2">
-          <div className="bg-blue-600 p-1.5 rounded-lg">
-            <Lock className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-bold text-xl tracking-tight text-slate-900">
-            WiFaKey
-          </span>
-        </div>
-        <nav className="hidden md:flex gap-6 text-sm font-medium text-slate-600">
-          <a href="#" className="hover:text-blue-600">
-            Giới thiệu
-          </a>
-          <a href="#" className="hover:text-blue-600">
-            Tài liệu
-          </a>
-          <a href="#" className="hover:text-blue-600">
-            Hỗ trợ
-          </a>
-        </nav>
-        <div className="flex gap-3">
-          <Button variant="ghost" size="sm">
-            Đăng nhập
-          </Button>
-        </div>
-      </header>
+      <Header />
       <div className="flex items-center justify-center min-h-screen">
-        <Card className="w-full max-w-sm">
+        <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Enroll application with Authorization Service</CardTitle>
           </CardHeader>
@@ -115,7 +95,7 @@ const Enroll = () => {
           <AlertDialogContent className="max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>
-                🎉 Client Registered Successfully!
+                Client Registered Successfully!
               </AlertDialogTitle>
               <AlertDialogDescription>
                 Ứng dụng của bạn đã được đăng ký thành công.
@@ -123,10 +103,21 @@ const Enroll = () => {
                 Dưới đây là thông tin xác thực:
               </AlertDialogDescription>
 
-              <div className="mt-4 p-3 rounded-md bg-gray-100 font-mono text-sm break-all">
-                <strong>Client ID:</strong> {result?.client_id}
-                <br />
-                <strong>Client Secret:</strong> {result?.client_secret}
+              <div className="mt-4 p-4 rounded-md bg-gray-100 space-y-4">
+                <ReadonlyField
+                  label="Client ID"
+                  value={result?.client_id ?? ""}
+                />
+
+                <SecretField
+                  label="Client Secret"
+                  value={result?.client_secret ?? ""}
+                />
+
+                <ReadonlyField
+                  label="Authorization Endpoint"
+                  value={authorizationEndpoint}
+                />
               </div>
 
               <AlertDialogDescription className="text-left text-yellow-600 mt-2">
@@ -142,6 +133,8 @@ const Enroll = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+
+      <Footer />
     </div>
   );
 };
