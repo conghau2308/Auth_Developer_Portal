@@ -17,6 +17,12 @@ export interface IClientSecretDto {
   client_secret: string;
 }
 
+export interface IResponseRegister {
+  status: number;
+  message: string;
+  response: IClientSecretDto;
+}
+
 export interface IUserInfor {
   username: string;
   name: string;
@@ -27,17 +33,34 @@ export interface IUserInfor {
 
 export const registerClientService = async (
   clientData: ICreateClientDto
-): Promise<IClientSecretDto> => {
-  const response: AxiosResponse<IClientSecretDto> = await axios.post(
-    `${API_BASE_URL}/portal/api/v1/enroll`,
-    clientData,
-    {
-      withCredentials: true,
-      headers: { "Content-Type": "application/json" },
-    }
-  );
+): Promise<{ data: IClientSecretDto | null; error: string | null }> => {
+  try {
+    const response: AxiosResponse<IClientSecretDto> = await axios.post(
+      `${API_BASE_URL}/portal/api/v1/enroll`,
+      clientData,
+      {
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
-  return response.data;
+    return { data: response.data, error: null };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    // Return error thay vì throw
+    let errorMessage = "Registration failed";
+    
+    if (error.response) {
+      errorMessage = error.response.data?.message || 
+        `Registration failed with status ${error.response.status}`;
+    } else if (error.request) {
+      errorMessage = "No response from server";
+    } else {
+      errorMessage = error.message || "Registration failed";
+    }
+    
+    return { data: null, error: errorMessage };
+  }
 };
 
 /* ===================== AUTH ===================== */
@@ -54,7 +77,7 @@ export const getAccessTokenByRefreshToken = async (): Promise<{
     );
 
     return response.data;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return {
       success: false,
@@ -74,7 +97,7 @@ export const getUserInfor = async (): Promise<{
     });
 
     return response.data;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return {
       success: false,
@@ -96,7 +119,7 @@ export const userLogout = async (): Promise<{
     );
 
     return response.data;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return {
       success: false,
@@ -117,7 +140,7 @@ export const userLogin = async (
     );
 
     return response.data;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return {
       success: false,
@@ -140,7 +163,7 @@ export const userEnrollService = async (
     );
 
     return response.data;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return {
       success: false,

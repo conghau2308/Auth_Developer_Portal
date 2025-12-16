@@ -97,7 +97,7 @@ const Header = () => {
         ) : isLogin ? (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="text-red-500">
                 Đăng xuất
               </Button>
             </AlertDialogTrigger>
