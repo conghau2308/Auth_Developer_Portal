@@ -34,8 +34,9 @@ import {
   Plus,
   LogOut,
 } from "lucide-react";
+import { API_BASE_URL } from "@/config/api";
 
-const BACKEND_URL = "http://localhost:8080";
+const BACKEND_URL = API_BASE_URL;
 
 interface SavedAccount {
   username: string;
