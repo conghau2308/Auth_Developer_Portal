@@ -141,7 +141,12 @@ const OAuthLoginPage = () => {
         if (codeChallengeMethod) params.append("code_challenge_method", codeChallengeMethod);
 
         const response = await fetch(
-          `${BACKEND_URL}/oauth2/authorize/validate?${params.toString()}`
+          `${BACKEND_URL}/oauth2/authorize/validate?${params.toString()}`,
+          {
+            headers: {
+              'ngrok-skip-browser-warning': 'true',
+            }
+          }
         );
 
         const data = await response.json();
