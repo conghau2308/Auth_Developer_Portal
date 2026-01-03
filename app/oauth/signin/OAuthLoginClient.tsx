@@ -30,15 +30,23 @@ import {
   ArrowLeft,
   Lock,
   AlertCircle,
+  User,
+  Plus,
+  LogOut,
 } from "lucide-react";
 
 const BACKEND_URL = "http://localhost:8080";
+
+interface SavedAccount {
+  username: string;
+  name?: string;
+  lastUsed: number;
+}
 
 const OAuthLoginPage = () => {
   const searchParams = useSearchParams();
   const webcamRef = useRef<Webcam>(null);
 
-  // OAuth parameters từ URL
   const clientId = searchParams.get("client_id");
   const redirectUri = searchParams.get("redirect_uri");
   const scope = searchParams.get("scope") || "openid profile";
@@ -48,12 +56,12 @@ const OAuthLoginPage = () => {
   const codeChallenge = searchParams.get("code_challenge");
   const codeChallengeMethod = searchParams.get("code_challenge_method");
 
-  // UI state
+  const [currentView, setCurrentView] = useState<"picker" | "manual">("picker");
+  const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>([]);
   const [username, setUsername] = useState<string>("");
   const [imgSrc, setImgSrc] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Validation state
   const [isValidating, setIsValidating] = useState(true);
   const [validationError, setValidationError] = useState<{
     error: string;
@@ -66,21 +74,53 @@ const OAuthLoginPage = () => {
     scopes: string[];
   } | null>(null);
 
-  // Auth state
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
 
-  /**
-   * STEP 1: Validate OAuth parameters khi page load
-   */
+  useEffect(() => {
+    const accounts = localStorage.getItem("wifakey_accounts");
+    if (accounts) {
+      try {
+        const parsed = JSON.parse(accounts);
+        setSavedAccounts(parsed.sort((a: SavedAccount, b: SavedAccount) => b.lastUsed - a.lastUsed));
+      } catch (e) {
+        console.error("Failed to parse saved accounts", e);
+      }
+    }
+  }, []);
+
+  const saveAccount = (username: string, name?: string) => {
+    const accounts = [...savedAccounts];
+    const existingIndex = accounts.findIndex((a) => a.username === username);
+
+    if (existingIndex >= 0) {
+      accounts[existingIndex].lastUsed = Date.now();
+      if (name) accounts[existingIndex].name = name;
+    } else {
+      accounts.push({
+        username,
+        name,
+        lastUsed: Date.now(),
+      });
+    }
+
+    setSavedAccounts(accounts.sort((a, b) => b.lastUsed - a.lastUsed));
+    localStorage.setItem("wifakey_accounts", JSON.stringify(accounts));
+  };
+
+  const removeAccount = (username: string) => {
+    const filtered = savedAccounts.filter((a) => a.username !== username);
+    setSavedAccounts(filtered);
+    localStorage.setItem("wifakey_accounts", JSON.stringify(filtered));
+  };
+
   useEffect(() => {
     const validateOAuth = async () => {
-      // Kiểm tra required parameters
       if (!clientId || !redirectUri) {
         setValidationError({
           error: "invalid_request",
-          description:
-            "Missing required parameters: client_id and redirect_uri",
+          description: "Missing required parameters: client_id and redirect_uri",
           shouldRedirect: false,
         });
         setIsValidating(false);
@@ -98,8 +138,7 @@ const OAuthLoginPage = () => {
         if (state) params.append("state", state);
         if (nonce) params.append("nonce", nonce);
         if (codeChallenge) params.append("code_challenge", codeChallenge);
-        if (codeChallengeMethod)
-          params.append("code_challenge_method", codeChallengeMethod);
+        if (codeChallengeMethod) params.append("code_challenge_method", codeChallengeMethod);
 
         const response = await fetch(
           `${BACKEND_URL}/oauth2/authorize/validate?${params.toString()}`
@@ -108,7 +147,6 @@ const OAuthLoginPage = () => {
         const data = await response.json();
 
         if (!response.ok || !data.valid) {
-          // Có lỗi validation
           setValidationError({
             error: data.error,
             description: data.error_description,
@@ -116,7 +154,6 @@ const OAuthLoginPage = () => {
             redirectUrl: data.redirect_url,
           });
         } else {
-          // Validation thành công
           setClientInfo({
             clientName: data.client_name,
             scopes: data.scopes,
@@ -135,33 +172,59 @@ const OAuthLoginPage = () => {
     };
 
     validateOAuth();
-  }, [
-    clientId,
-    redirectUri,
-    scope,
-    responseType,
-    state,
-    nonce,
-    codeChallenge,
-    codeChallengeMethod,
-  ]);
+  }, [clientId, redirectUri, scope, responseType, state, nonce, codeChallenge, codeChallengeMethod]);
 
-  /**
-   * STEP 2: Auto-redirect nếu có lỗi và shouldRedirect = true
-   */
-  useEffect(() => {
-    if (validationError?.shouldRedirect && validationError.redirectUrl) {
-      // Đợi 3 giây để user đọc lỗi, sau đó redirect
-      // const timer = setTimeout(() => {
-      //   window.location.href = validationError.redirectUrl!;
-      // }, 3000);
-      // return () => clearTimeout(timer);
+  const trySSO = async (accountUsername: string) => {
+    setIsAuthenticating(true);
+    setAuthError(null);
+    setSelectedAccount(accountUsername);
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/oauth2/authenticate`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: accountUsername,
+          clientId,
+          redirectUri,
+          scope,
+          state,
+          nonce,
+          codeChallenge,
+          codeChallengeMethod,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        if (data.sso_used) {
+          console.log("✅ SSO authentication successful");
+        }
+
+        saveAccount(accountUsername);
+        window.location.href = data.redirect_url;
+      } else {
+        if (data.error === "access_denied" &&
+          data.error_description?.includes("khuôn mặt")) {
+          console.log("🔑 SSO expired, falling back to face auth");
+          setUsername(accountUsername);
+          setIsDialogOpen(true);
+        } else {
+          setAuthError(data.error_description || "Authentication failed");
+        }
+      }
+    } catch (error) {
+      console.error("SSO error:", error);
+      setUsername(accountUsername);
+      setIsDialogOpen(true);
+    } finally {
+      setIsAuthenticating(false);
+      setSelectedAccount(null);
     }
-  }, [validationError]);
+  };
 
-  /**
-   * STEP 3: Handle face capture
-   */
   const capture = useCallback(() => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
@@ -174,9 +237,6 @@ const OAuthLoginPage = () => {
     setAuthError(null);
   };
 
-  /**
-   * STEP 4: Handle authentication
-   */
   const handleAuthenticate = async () => {
     if (!imgSrc || !username.trim()) {
       alert("Please provide username and face image");
@@ -191,6 +251,7 @@ const OAuthLoginPage = () => {
 
       const response = await fetch(`${BACKEND_URL}/oauth2/authenticate`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: username.trim(),
@@ -208,18 +269,10 @@ const OAuthLoginPage = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Authentication thành công - redirect về client
+        saveAccount(username.trim());
         window.location.href = data.redirect_url;
       } else {
-        // Authentication thất bại
         setAuthError(data.error_description || "Authentication failed");
-
-        // Nếu là lỗi nghiêm trọng (không phải face auth failed), redirect
-        if (data.error !== "access_denied" && data.redirect_url) {
-          // setTimeout(() => {
-          //   window.location.href = data.redirect_url;
-          // }, 3000);
-        }
       }
     } catch (error) {
       console.error("Authentication error:", error);
@@ -229,8 +282,7 @@ const OAuthLoginPage = () => {
     }
   };
 
-  const onPreLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onManualLogin = () => {
     if (!username.trim()) {
       alert("Please enter username");
       return;
@@ -240,7 +292,6 @@ const OAuthLoginPage = () => {
     setAuthError(null);
   };
 
-  // Loading state
   if (isValidating) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -256,7 +307,6 @@ const OAuthLoginPage = () => {
     );
   }
 
-  // Error state - KHÔNG thể redirect
   if (validationError && !validationError.shouldRedirect) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
@@ -276,8 +326,7 @@ const OAuthLoginPage = () => {
               </AlertDescription>
             </Alert>
             <p className="text-sm text-gray-600 mt-4">
-              Please contact the application developer if you believe this is an
-              error.
+              Please contact the application developer if you believe this is an error.
             </p>
           </CardContent>
         </Card>
@@ -285,35 +334,6 @@ const OAuthLoginPage = () => {
     );
   }
 
-  // Error state - CÓ THỂ redirect
-  // if (validationError && validationError.shouldRedirect) {
-  //   return (
-  //     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-  //       <Card className="w-full max-w-md border-t-4 border-t-orange-600">
-  //         <CardHeader>
-  //           <CardTitle className="text-xl text-orange-600 flex items-center gap-2">
-  //             <AlertCircle />
-  //             Authorization Error
-  //           </CardTitle>
-  //         </CardHeader>
-  //         <CardContent>
-  //           <Alert>
-  //             <AlertDescription>
-  //               <strong>{validationError.error}</strong>
-  //               <br />
-  //               {validationError.description}
-  //             </AlertDescription>
-  //           </Alert>
-  //           <p className="text-sm text-gray-600 mt-4">
-  //             Redirecting you back to the application in 3 seconds...
-  //           </p>
-  //         </CardContent>
-  //       </Card>
-  //     </div>
-  //   );
-  // }
-
-  // Main login UI
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
       <div className="mb-8 text-center space-y-2">
@@ -337,11 +357,57 @@ const OAuthLoginPage = () => {
 
       <Card className="w-full max-w-md shadow-lg border-t-4 border-t-blue-600">
         <CardHeader>
-          <CardTitle className="text-xl">Login to your account</CardTitle>
+          <CardTitle className="text-xl">
+            {currentView === "picker" ? "Choose an account" : "Login to your account"}
+          </CardTitle>
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={onPreLogin}>
+          {currentView === "picker" && savedAccounts.length > 0 ? (
+            <div className="space-y-3">
+              {savedAccounts.map((account) => (
+                <div
+                  key={account.username}
+                  className="flex items-center gap-3 p-3 border rounded-lg hover:bg-slate-50 cursor-pointer group relative"
+                  onClick={() => !isAuthenticating && trySSO(account.username)}
+                >
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    <User className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-slate-900 truncate">
+                      {account.name || account.username}
+                    </p>
+                    <p className="text-sm text-slate-500 truncate">
+                      {account.username}
+                    </p>
+                  </div>
+                  {isAuthenticating && selectedAccount === account.username ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeAccount(account.username);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded transition-opacity"
+                    >
+                      <LogOut className="w-4 h-4 text-red-600" />
+                    </button>
+                  )}
+                </div>
+              ))}
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setCurrentView("manual")}
+                disabled={isAuthenticating}
+              >
+                <Plus className="mr-2 h-4 w-4" /> Use another account
+              </Button>
+            </div>
+          ) : (
             <div className="grid gap-4">
               <div className="grid gap-2">
                 <label htmlFor="username" className="text-sm font-medium">
@@ -349,22 +415,38 @@ const OAuthLoginPage = () => {
                 </label>
                 <Input
                   id="username"
-                  required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && onManualLogin()}
                   className="bg-slate-50"
                   disabled={isAuthenticating}
                 />
               </div>
               <Button
-                type="submit"
+                onClick={onManualLogin}
                 className="w-full bg-blue-600 hover:bg-blue-700 h-11 text-md"
                 disabled={isAuthenticating}
               >
                 <ShieldCheck className="mr-2 h-5 w-5" /> Continue with Face ID
               </Button>
+
+              {savedAccounts.length > 0 && currentView === "manual" && (
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentView("picker")}
+                  disabled={isAuthenticating}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Back to account selection
+                </Button>
+              )}
             </div>
-          </form>
+          )}
+
+          {authError && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertDescription>{authError}</AlertDescription>
+            </Alert>
+          )}
         </CardContent>
 
         <CardFooter className="flex justify-center border-t bg-slate-50 py-4">
@@ -373,9 +455,8 @@ const OAuthLoginPage = () => {
             className="text-slate-500 hover:text-red-600"
             onClick={() => {
               if (redirectUri && state) {
-                const errorUrl = `${redirectUri}${
-                  redirectUri.includes("?") ? "&" : "?"
-                }error=access_denied&error_description=User cancelled&state=${state}`;
+                const errorUrl = `${redirectUri}${redirectUri.includes("?") ? "&" : "?"
+                  }error=access_denied&error_description=User cancelled&state=${state}`;
                 window.location.href = errorUrl;
               } else {
                 window.close();
@@ -388,7 +469,6 @@ const OAuthLoginPage = () => {
         </CardFooter>
       </Card>
 
-      {/* Face Authentication Dialog */}
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
@@ -401,7 +481,6 @@ const OAuthLoginPage = () => {
 
           <div className="flex flex-col items-center justify-center min-h-[400px] bg-black rounded-md overflow-hidden relative">
             {imgSrc ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={imgSrc}
                 alt="Captured"
