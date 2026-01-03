@@ -34,9 +34,8 @@ import {
   Plus,
   LogOut,
 } from "lucide-react";
-import { API_BASE_URL } from "@/config/api";
 
-const BACKEND_URL = API_BASE_URL;
+const BACKEND_URL = "https://uninherited-todd-febriferous.ngrok-free.dev";
 
 interface SavedAccount {
   username: string;
