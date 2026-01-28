@@ -80,6 +80,7 @@ const UserEnrollPage = () => {
     try {
       // Lấy chuỗi raw base64 (loại bỏ header data:image/...)
       const base64Image = imgSrc.split(",")[1];
+      console.log(base64Image);
 
       // Gửi tất cả dữ liệu lên server
       const response = await userEnrollService(username, name, email, base64Image);
