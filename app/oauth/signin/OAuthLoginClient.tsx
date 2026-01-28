@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 import { API_BASE_URL } from "@/config/api";
 
-const BACKEND_URL = API_BASE_URL;
+const BACKEND_URL = "https://uninherited-todd-febriferous.ngrok-free.dev";
 
 interface SavedAccount {
   username: string;
@@ -142,7 +142,12 @@ const OAuthLoginPage = () => {
         if (codeChallengeMethod) params.append("code_challenge_method", codeChallengeMethod);
 
         const response = await fetch(
-          `${BACKEND_URL}/oauth2/authorize/validate?${params.toString()}`
+          `${BACKEND_URL}/oauth2/authorize/validate?${params.toString()}`,
+          {
+            headers: {
+              'ngrok-skip-browser-warning': 'true',
+            }
+          }
         );
 
         const data = await response.json();
@@ -184,7 +189,7 @@ const OAuthLoginPage = () => {
       const response = await fetch(`${BACKEND_URL}/oauth2/authenticate`, {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true', },
         body: JSON.stringify({
           username: accountUsername,
           clientId,
@@ -253,7 +258,7 @@ const OAuthLoginPage = () => {
       const response = await fetch(`${BACKEND_URL}/oauth2/authenticate`, {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true', },
         body: JSON.stringify({
           username: username.trim(),
           image_b64: base64Image,
