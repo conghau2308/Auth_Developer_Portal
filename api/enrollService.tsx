@@ -36,7 +36,7 @@ export const registerClientService = async (
 ): Promise<{ data: IClientSecretDto | null; error: string | null }> => {
   try {
     const response: AxiosResponse<IClientSecretDto> = await axios.post(
-      `${API_BASE_URL}/portal/api/v1/enroll`,
+      `${API_BASE_URL}/client/developer/enroll`,
       clientData,
       {
         withCredentials: true,
@@ -45,20 +45,20 @@ export const registerClientService = async (
     );
 
     return { data: response.data, error: null };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // Return error thay vì throw
     let errorMessage = "Registration failed";
-    
+
     if (error.response) {
-      errorMessage = error.response.data?.message || 
+      errorMessage = error.response.data?.message ||
         `Registration failed with status ${error.response.status}`;
     } else if (error.request) {
       errorMessage = "No response from server";
     } else {
       errorMessage = error.message || "Registration failed";
     }
-    
+
     return { data: null, error: errorMessage };
   }
 };
@@ -71,7 +71,7 @@ export const getAccessTokenByRefreshToken = async (): Promise<{
 }> => {
   try {
     const response = await axios.post(
-      `${API_BASE_URL}/face-auth/refresh`,
+      `${API_BASE_URL}/auth/refresh`,
       {},
       { withCredentials: true }
     );
@@ -134,8 +134,11 @@ export const userLogin = async (
 ): Promise<{ success: boolean; message: string }> => {
   try {
     const response = await axios.post(
-      `${API_BASE_URL}/face-auth/verify/${username}`,
-      { image_b64: imageBase64 },
+      `${API_BASE_URL}/auth/verify`,
+      {
+        username,
+        imageBase64
+      },
       { withCredentials: true }
     );
 
