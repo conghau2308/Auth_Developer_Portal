@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const REQUIRED_PARAMS = ["client_id", "redirect_uri", "response_type"];
+const REQUIRED_PARAMS = ["client_id", "redirect_uri", "response_type", "scope", "state", "nonce", "code_challenge", "code_challenge_method"];
 
 export function proxy(req: NextRequest) {
     const { searchParams } = req.nextUrl;

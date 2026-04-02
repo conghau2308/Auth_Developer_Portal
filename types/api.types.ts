@@ -81,3 +81,55 @@ export interface ApiError {
   code: string;
   details?: Record<string, string[]>; // Validation errors
 }
+
+export interface OAuthValidateParams {
+  client_id: string;
+  redirect_uri: string;
+  scope: string;
+  response_type: string;
+  state: string;
+  nonce: string;
+  code_challenge: string;
+  code_challenge_method: string;
+}
+
+export interface OAuth2ValidateClientResponseDto {
+  clientName: string;
+  clientIcon?: string;
+  clientHomepageUrl?: string;
+  scopes: string[];
+}
+
+export interface OAuthAuthorizeRequestDto {
+  client_id: string;
+  redirect_uri: string;
+  scope: string;
+  state: string;
+  nonce: string;
+  code_challenge: string;
+  code_challenge_method: string;
+}
+
+export type OAuthAuthorizeResponseDto =
+  | {
+    consent_required: true;
+    pending_scopes: string[];
+    client_name: string;
+    redirect_url?: never;
+  }
+  | {
+    consent_required: false;
+    redirect_url: string;
+    pending_scopes?: never;
+    client_name?: never;
+  };
+
+export interface OAuthConsentRequestDto {
+  client_id: string;
+  redirect_uri: string;
+  scope: string;
+  state: string;
+  nonce: string;
+  code_challenge: string;
+  code_challenge_method: string;
+}

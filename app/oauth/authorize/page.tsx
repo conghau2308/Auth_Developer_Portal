@@ -1,86 +1,139 @@
-import Link from "next/link";
-import { Info, Settings, ShieldCheck, Lock } from "lucide-react";
-import { AuthorizeForm } from "@/components/oauth/authorize-form";
-import { MobileNavBar } from "@/components/layout/mobile-navbar";
+"use client";
 
-export default function AuthorizePage() {
+import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { useOAuthValidate } from "@/hooks/use-oauth";
+import { useAuthorize, useAuthorizeConsent } from "@/hooks/use-oauth";
+import { PageShell } from "@/components/oauth/page-shell";
+import { LoginFlow } from "@/components/oauth/login-flow";
+import { AccountSelector } from "@/components/oauth/account-selector";
+import { AuthorizeScreen } from "@/components/oauth/authorize-screen";
+import { ErrorScreen } from "@/components/oauth/error-screen";
+
+type OAuthScreen = "account-select" | "login" | "authorize";
+
+export default function OAuthAuthorizePage() {
+  const searchParams = useSearchParams();
+
+  const client_id = searchParams.get("client_id") ?? "";
+  const redirect_uri = searchParams.get("redirect_uri") ?? "";
+  const response_type = searchParams.get("response_type") ?? "";
+  const scope = searchParams.get("scope") ?? "";
+  const state = searchParams.get("state") ?? "";
+  const nonce = searchParams.get("nonce") ?? "";
+  const code_challenge = searchParams.get("code_challenge") ?? "";
+  const code_challenge_method = searchParams.get("code_challenge_method") ?? "";
+
+  const oauthParams = {
+    client_id, redirect_uri, response_type,
+    scope, state, nonce, code_challenge, code_challenge_method,
+  };
+
+  // ── Data fetching ──
+  const { data: authData, isLoading: authLoading } = useAuth();
+  const {
+    data: validateData,
+    isLoading: validateLoading,
+    isError: validateError,
+  } = useOAuthValidate(oauthParams);
+
+  // ── Screen state ──
+  // Chỉ dùng cho trường hợp cần consent sau khi authorize
+  const [screen, setScreen] = useState<OAuthScreen | null>(null);
+  const [pendingScopes, setPendingScopes] = useState<string[]>([]);
+
+  // ── Authorize mutation — dùng chung cho cả 2 case (sau login và sau chọn account) ──
+  const authorize = useAuthorize((scopes) => {
+    setPendingScopes(scopes);
+    setScreen("authorize");
+  });
+
+  const authorizeConsent = useAuthorizeConsent();
+
+  // ── Handlers ──
+  const handleAuthorize = () => {
+    authorize.mutate(oauthParams);
+  };
+
+  // Sau khi login xong → gọi authorize luôn, không qua AccountSelector
+  const handleLoginSuccess = () => {
+    handleAuthorize();
+  };
+
+  const handleConsentConfirm = (scopes: string[]) => {
+    authorizeConsent.mutate({ ...oauthParams, scope: scopes.join(" ") });
+  };
+
+  // ── Derived screen ──
+  // Nếu screen được set manually (sau khi authorize trả về consent_required) → dùng đó
+  // Nếu chưa → dựa vào authData
+  const resolvedScreen: OAuthScreen = (() => {
+    if (screen) return screen;
+    if (authLoading) return "login";        // placeholder trong lúc loading
+    return authData ? "account-select" : "login";
+  })();
+
+  // ── Guards ──
+  const isLoading = authLoading || validateLoading;
+
+  if (!client_id || validateError) {
+    return (
+      <PageShell>
+        <ErrorScreen message="Client ID không hợp lệ hoặc ứng dụng không được phép." />
+      </PageShell>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <PageShell>
+        <div className="flex flex-col items-center justify-center gap-4 py-20">
+          <Loader2 size={32} className="animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Đang kiểm tra phiên đăng nhập…</p>
+        </div>
+      </PageShell>
+    );
+  }
+
+  const clientName = validateData?.clientName ?? "Ứng dụng";
+  const scopes = validateData?.scopes ?? [];
+  const user = { name: authData?.name ?? "", email: authData?.email ?? "" };
+
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-      {/* Header */}
-      <header className="w-full sticky top-0 z-50 flex justify-between items-center px-6 py-4 bg-card border-b border-border">
-        <Link href="/" className="text-xl font-black tracking-tighter text-primary">
-          Ethereal Sentinel
-        </Link>
-        <nav className="hidden md:flex items-center gap-8">
-          {["Security", "Help"].map((item) => (
-            <Link
-              key={item}
-              href="#"
-              className="text-muted-foreground font-medium hover:text-foreground tracking-tight transition-colors duration-300"
-            >
-              {item}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex items-center gap-2">
-          <button className="p-2 rounded-full hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground">
-            <Info size={20} />
-          </button>
-          <button className="p-2 rounded-full hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground">
-            <Settings size={20} />
-          </button>
-        </div>
-      </header>
+    <PageShell clientName={clientName} clientUrl={validateData?.clientHomepageUrl}>
 
-      <main className="flex-grow flex items-center justify-center px-4 py-12 relative overflow-hidden">
-        {/* Background ambient */}
-        <div className="absolute inset-0 biometric-pulse pointer-events-none" />
+      {/* Chưa đăng nhập → form login, sau login gọi authorize luôn */}
+      {resolvedScreen === "login" && (
+        <LoginFlow onSuccess={handleLoginSuccess} />
+      )}
 
-        <div className="max-w-xl w-full flex flex-col gap-8 relative z-10">
-          {/* Context header */}
-          <div className="text-center space-y-3">
-            <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
-              Authorize with The Obsidian Lens
-            </h1>
-            <div className="flex items-center justify-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden border border-border">
-                <img
-                  src="https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?auto=format&fit=crop&w=64&q=80"
-                  alt="App icon"
-                  className="w-6 h-6 object-cover rounded"
-                />
-              </div>
-              <p className="text-muted-foreground font-medium">
-                <span className="text-foreground font-semibold not-italic">Application X</span>
-                {" "}wants to access your profile
-              </p>
-            </div>
-          </div>
+      {/* Đã đăng nhập → chọn account, sau đó gọi authorize */}
+      {resolvedScreen === "account-select" && authData && (
+        <AccountSelector
+          user={user}
+          clientName={clientName}
+          onSelect={handleAuthorize}
+          onSwitchAccount={() => setScreen("login")}
+        />
+      )}
 
-          {/* Main card */}
-          <AuthorizeForm />
+      {/* Backend trả consent_required=true → hiện màn hình cấp quyền */}
+      {resolvedScreen === "authorize" && (
+        <AuthorizeScreen
+          user={user}
+          clientName={clientName}
+          clientIcon={validateData?.clientIcon}
+          clientHomepageUrl={validateData?.clientHomepageUrl}
+          scopes={pendingScopes.length > 0 ? pendingScopes : scopes}
+          clientId={client_id}
+          onConfirm={handleConsentConfirm}
+          onDeny={() => setScreen(authData ? "account-select" : "login")}
+          isLoading={authorizeConsent.isPending}
+        />
+      )}
 
-          {/* Security badges */}
-          <div className="flex flex-wrap justify-center gap-4">
-            {[
-              { icon: ShieldCheck, label: "Secure Biometric Node" },
-              { icon: Lock, label: "End-to-End Encrypted" },
-            ].map(({ icon: Icon, label }) => (
-              <div
-                key={label}
-                className="bg-muted/20 px-4 py-2 rounded-full flex items-center gap-2 border border-border"
-              >
-                <Icon size={16} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground font-semibold">
-                  {label}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </main>
-
-      <MobileNavBar />
-    </div>
+    </PageShell>
   );
 }
