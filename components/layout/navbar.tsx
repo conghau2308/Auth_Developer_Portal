@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth, useLogout } from "@/hooks/use-auth";
-import { LogOut, UserRound } from "lucide-react";
+import { LogOut, Settings, UserRound } from "lucide-react";
 import Link from "next/link";
 
 export function Navbar() {
@@ -62,8 +62,7 @@ export function Navbar() {
                 <div className="flex items-center gap-3">
                     {showSkeleton ? (
                         /* Skeleton loading cho Avatar */
-                        // <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
-                        <div> Loading...</div>
+                        <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
                     ) : user ? (
                         <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
@@ -121,6 +120,13 @@ export function Navbar() {
                                         {logout.isPending ? "Logging out..." : "Log out"}
                                     </span>
                                 </DropdownMenuItem>
+
+                                <DropdownMenuItem asChild onClick={() => console.log("user data", user)} className="cursor-pointer rounded-md mx-1 my-0.5 px-2.5 py-2 hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary transition-colors outline-none">
+                                    <Link href="/settings" className="flex items-center gap-2.5 w-full">
+                                        <Settings size={16} />
+                                        <span className="font-medium text-sm">Settings</span>
+                                    </Link>
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     ) : (
@@ -145,7 +151,7 @@ export function Navbar() {
                         </>
                     )}
                 </div>
-            </div>
-        </nav>
+            </div >
+        </nav >
     );
 }

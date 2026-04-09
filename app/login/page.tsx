@@ -50,7 +50,7 @@ export default function LoginPage() {
         setFaceBase64(null);
         setBiometricDone(false);
         setStep("username");
-        router.push('/');
+        router.back();
       }
     })
   }

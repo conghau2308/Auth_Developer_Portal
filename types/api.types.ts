@@ -13,11 +13,7 @@ export interface User {
 
 // DTO = Data Transfer Object (data gửi lên server)
 export interface UpdateUserDTO {
-  name?: string;
-  phone?: string;
-  address?: string;
-  // Chỉ include các field được phép update
-  // Không có id, email, role (do backend control)
+  name: string;
 }
 
 export interface CreateUserDTO {
@@ -132,4 +128,123 @@ export interface OAuthConsentRequestDto {
   nonce: string;
   code_challenge: string;
   code_challenge_method: string;
+}
+
+export interface AuthorizedApplication {
+  id: string;
+  grantedScopes: string[];
+  grantedAt: string;
+  updatedAt: string;
+  clientName: string;
+  clientIcon?: string;
+}
+
+export interface AuthorizedApplicationResponseDto {
+  items: AuthorizedApplication[];
+  page: number;
+  size: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+export interface ClientMemberResponseDto {
+  id: string;
+  clientId: string;
+  clientName: string;
+  clientIcon?: string;
+  createdAt: string;
+  role: "OWNER" | "ADMIN" | "DEVELOPER";
+}
+
+export interface SecretUserDto {
+  userId: string;
+  name: string;
+  avatar?: string;
+}
+
+export interface ClientSecret {
+  secretId: string;
+  maskedValue: string; // Chỉ hiển thị dạng ****1234
+  createdAt: string;
+  createdByUser: SecretUserDto;
+  revokedAt: string | null;
+  revokedByUser: SecretUserDto | null;
+  active: boolean;
+}
+
+export interface ClientCredentialsResponseDto {
+  id: string;
+  clientId: string;
+  clientName: string;
+  clientIcon?: string;
+  redirectUri: string;
+  clientHomePageUrl?: string;
+  createdAt: string;
+  role: "OWNER" | "ADMIN" | "DEVELOPER";
+  clientSecrets: ClientSecret[];
+}
+
+export interface NewClientSecretResponseDto {
+  secretId: string;
+  secretValue: string; // Giá trị đầy đủ của secret mới tạo (chỉ trả về lần này duy nhất)
+}
+
+export interface UpdateClientRequestDto {
+  clientName: string;
+  redirectUri: string;
+}
+
+export interface EnrollNewClientRequestDto {
+  clientName: string;
+  redirectUri: string;
+}
+
+export interface EnrollNewClientResponseDto {
+  id: string;
+}
+
+export interface MemberOfClientDto {
+  userId: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role: "OWNER" | "ADMIN" | "DEVELOPER";
+  addedAt: string;
+}
+
+export interface MemberIsPendingDto {
+  invitationId: string;
+  inviteeEmail: string;
+  avatar?: string;
+  role: "ADMIN" | "DEVELOPER";
+  status: "PENDING";
+  expiresAt: string;
+  createdAt: string;
+  invitedByName: string;
+}
+
+export interface UserSearchDto {
+  userId: string;
+  username: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
+export interface InviteUserRequest {
+  userId: string;
+  role: "ADMIN" | "DEVELOPER";
+}
+
+export interface InvitationPreviewResponseDto {
+  clientName: string;
+  role: "ADMIN" | "DEVELOPER";
+  invitedByName: string;
+  invitedByEmail: string;
+  inviteeEmail: string;
+  expiresAt: string;
+}
+
+export interface AcceptInvitationResponseDto {
+  clientId: string;
 }

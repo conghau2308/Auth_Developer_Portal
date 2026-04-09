@@ -44,39 +44,75 @@
 }
 
 :root {
+  /* Core palette — mapped to Obsidian Lens design tokens */
   --background: 222 24% 8%;
+  /* #0a0b10  ≈ --bg  */
   --foreground: 225 8% 89%;
+  /* #e2e2e8  ≈ --text */
   --card: 222 17% 12%;
+  /* #111318  ≈ --bg2  */
   --card-foreground: 225 8% 89%;
   --popover: 222 17% 12%;
   --popover-foreground: 225 8% 89%;
-  --primary: 186 100% 48%;
-  --primary-foreground: 186 100% 11%;
+
+  /* Primary = accent (violet) */
+  --primary: 252 100% 71%;
+  /* #7c6aff  ≈ --accent */
+  --primary-foreground: 252 100% 11%;
+
   --secondary: 225 29% 81%;
   --secondary-foreground: 222 56% 13%;
+
   --muted: 223 11% 19%;
-  --muted-foreground: 225 5% 78%;
+  /* #28282f  ≈ --bg3  */
+  --muted-foreground: 240 5% 45%;
+  /* #6b6b7a  ≈ --muted */
+
   --accent: 223 11% 19%;
   --accent-foreground: 225 8% 89%;
-  --destructive: 0 84% 60%;
+
+  --destructive: 0 84% 64%;
+  /* #ff4d4d  ≈ --danger */
   --destructive-foreground: 0 0% 98%;
-  --border: 223 7% 24%;
-  --input: 223 7% 24%;
-  --ring: 186 100% 48%;
+
+  --border: 240 5% 17%;
+  /* #2a2a2f  ≈ --border  */
+  --input: 240 5% 17%;
+  --ring: 252 100% 71%;
+
   --radius: 0.5rem;
-  --chart-1: 186 100% 48%;
-  --chart-2: 200 80% 55%;
-  --chart-3: 210 70% 50%;
+
+  /* Chart colours */
+  --chart-1: 252 100% 71%;
+  --chart-2: 160 84% 55%;
+  --chart-3: 38 92% 50%;
   --chart-4: 175 60% 45%;
-  --chart-5: 160 50% 40%;
+  --chart-5: 210 70% 50%;
+
+  /* Sidebar */
   --sidebar: 222 24% 8%;
   --sidebar-foreground: 225 8% 89%;
-  --sidebar-primary: 186 100% 48%;
-  --sidebar-primary-foreground: 186 100% 11%;
+  --sidebar-primary: 252 100% 71%;
+  --sidebar-primary-foreground: 252 100% 11%;
   --sidebar-accent: 223 11% 19%;
   --sidebar-accent-foreground: 225 8% 89%;
-  --sidebar-border: 223 7% 24%;
-  --sidebar-ring: 186 100% 48%;
+  --sidebar-border: 240 5% 17%;
+  --sidebar-ring: 252 100% 71%;
+
+  /* Extra design tokens (used directly in components) */
+  --ol-bg: #0a0a0b;
+  --ol-bg2: #111113;
+  --ol-bg3: #18181b;
+  --ol-bg4: #1f1f23;
+  --ol-border: #2a2a2f;
+  --ol-border2: #3a3a42;
+  --ol-accent: #7c6aff;
+  --ol-accent2: #a594ff;
+  --ol-danger: #ff4d4d;
+  --ol-success: #3ddc84;
+  --ol-warn: #f59e0b;
+  --ol-muted: #6b6b7a;
+  --ol-muted2: #4a4a56;
 }
 
 .dark {
@@ -86,32 +122,27 @@
   --card-foreground: 225 8% 89%;
   --popover: 222 17% 12%;
   --popover-foreground: 225 8% 89%;
-  --primary: 186 100% 48%;
-  --primary-foreground: 186 100% 11%;
+  --primary: 252 100% 71%;
+  --primary-foreground: 252 100% 11%;
   --secondary: 225 29% 81%;
   --secondary-foreground: 222 56% 13%;
   --muted: 223 11% 19%;
-  --muted-foreground: 225 5% 78%;
+  --muted-foreground: 240 5% 45%;
   --accent: 223 11% 19%;
   --accent-foreground: 225 8% 89%;
-  --destructive: 0 84% 60%;
+  --destructive: 0 84% 64%;
   --destructive-foreground: 0 0% 98%;
-  --border: 223 7% 24%;
-  --input: 223 7% 24%;
-  --ring: 186 100% 48%;
-  --chart-1: 186 100% 48%;
-  --chart-2: 200 80% 55%;
-  --chart-3: 210 70% 50%;
-  --chart-4: 175 60% 45%;
-  --chart-5: 160 50% 40%;
+  --border: 240 5% 17%;
+  --input: 240 5% 17%;
+  --ring: 252 100% 71%;
   --sidebar: 222 24% 8%;
   --sidebar-foreground: 225 8% 89%;
-  --sidebar-primary: 186 100% 48%;
-  --sidebar-primary-foreground: 186 100% 11%;
+  --sidebar-primary: 252 100% 71%;
+  --sidebar-primary-foreground: 252 100% 11%;
   --sidebar-accent: 223 11% 19%;
   --sidebar-accent-foreground: 225 8% 89%;
-  --sidebar-border: 223 7% 24%;
-  --sidebar-ring: 186 100% 48%;
+  --sidebar-border: 240 5% 17%;
+  --sidebar-ring: 252 100% 71%;
 }
 
 @layer base {
@@ -121,7 +152,57 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
   }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ol-border2);
+  border-radius: 3px;
+}
+
+/* ── Animation ── */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-fade-slide {
+  animation: fadeSlideIn 0.2s ease;
+}
+
+.animate-modal-in {
+  animation: modalIn 0.2s ease;
 }
 
 @layer utilities {
@@ -132,10 +213,10 @@
   }
 
   .primary-gradient {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(186 100% 32%) 100%);
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(252 100% 52%) 100%);
   }
 
-  .biometric-pulse {
-    background: radial-gradient(circle, hsl(var(--primary) / 0.15) 0%, transparent 70%);
+  .avatar-gradient {
+    background: linear-gradient(135deg, var(--ol-accent), #c084fc);
   }
 }

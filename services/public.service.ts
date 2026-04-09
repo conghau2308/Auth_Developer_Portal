@@ -1,11 +1,7 @@
 import { publicApi } from '@/lib/api-client';
+import { InvitationPreviewResponseDto } from '@/types/api.types';
 
 export const publicService = {
-  getCountries: () => publicApi.get('/countries'),
-  
-  searchProducts: (query: string) => 
-    publicApi.get('/products/search', { params: { q: query } }),
-  
-  getProductDetail: (id: string) => 
-    publicApi.get(`/products/${id}`),
+  getInvitationPreview: (token: string) =>
+    publicApi.get<InvitationPreviewResponseDto>(`invitations/preview?token=${token}`),
 };
