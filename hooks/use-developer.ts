@@ -1,5 +1,5 @@
 import { developerService } from "@/services/developer.service"
-import { EnrollNewClientRequestDto, InviteUserRequest, UpdateClientRequestDto } from "@/types/api.types";
+import { EnrollNewClientRequestDto, InviteUserRequest, UpdateClientRequestDto, UpdateMemberRoleRequestDto } from "@/types/api.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -160,4 +160,35 @@ export const useSendInvitation = (client_id: string) => {
             }
         },
     });
+};
+
+export const useUpdateClientMemberRole = (client_id: string) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: UpdateMemberRoleRequestDto) =>
+            developerService.updateMemberRole(client_id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["developer", "client-members", client_id] });
+            toast.success("Cập nhật quyền thành công.");
+        },
+        onError: () => {
+            toast.error("Cập nhật quyền thất bại, vui lòng thử lại sau.");
+        }
+    })
+};
+
+export const useRemoveClientMember = (client_id: string, member_id: string) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: () => developerService.deleteMemberRole(client_id, member_id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["developer", "client-members", client_id] });
+            toast.success("Xóa thành viên thành công.");
+        },
+        onError: () => {
+            toast.error("Xóa thành viên thất bại, vui lòng thử lại sau.");
+        }
+    })
 };

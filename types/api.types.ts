@@ -248,3 +248,8 @@ export interface InvitationPreviewResponseDto {
 export interface AcceptInvitationResponseDto {
   clientId: string;
 }
+
+export interface UpdateMemberRoleRequestDto {
+  memberId: string;
+  role: string;
+}

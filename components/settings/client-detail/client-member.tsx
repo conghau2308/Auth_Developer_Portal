@@ -6,57 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Modal, ModalActions, ModalBody } from "../ui/modal";
 import {
     useClientMembers,
-    usePendingInvitations,
     useSendInvitation,
-    useRevokeInvitation,
-    useUpdateClientMemberRole,
-    useRemoveClientMember,
     useClientMemberIsPending,
     useDeleteInvitation,
     useSearchUsers,
+    useUpdateClientMemberRole,
+    useRemoveClientMember,
 } from "@/hooks/use-developer";
-import { ClientMember, MemberOfClientDto, PendingInvitationDto, UserSearchDto } from "@/types/api.types";
+import { MemberIsPendingDto, MemberOfClientDto, UserSearchDto } from "@/types/api.types";
 import { useDebounce } from "@/hooks/use-debounce";
-
-// ── Fake data (xóa khi có API) ───────────────────────────────────
-const FAKE_MEMBERS: ClientMember[] = [
-    {
-        membershipId: "m1",
-        userId: "u1",
-        name: "Nguyễn Văn An",
-        email: "an.nguyen@company.com",
-        role: "OWNER",
-        joinedAt: "2026-01-10T08:00:00Z",
-    },
-    {
-        membershipId: "m2",
-        userId: "u2",
-        name: "Trần Thị Bình",
-        email: "binh.tran@company.com",
-        role: "ADMIN",
-        joinedAt: "2026-02-14T10:30:00Z",
-    },
-    {
-        membershipId: "m3",
-        userId: "u3",
-        name: "Lê Minh Châu",
-        email: "chau.le@dev.io",
-        role: "DEVELOPER",
-        joinedAt: "2026-03-01T09:15:00Z",
-    },
-];
-
-const FAKE_PENDING: PendingInvitationDto[] = [
-    {
-        invitationId: "inv1",
-        inviteeEmail: "dung.pham@company.com",
-        role: "DEVELOPER",
-        status: "PENDING",
-        expiresAt: "2026-04-15T00:00:00Z",
-        createdAt: "2026-04-08T09:00:00Z",
-        invitedByName: "Nguyễn Văn An",
-    },
-];
 
 // ── Props ────────────────────────────────────────────────────────
 interface ClientMembersProps {
@@ -174,7 +132,7 @@ function MemberRow({
 function PendingRow({
     invitation, onRevoke, isRevoking,
 }: {
-    invitation: PendingInvitationDto;
+    invitation: MemberIsPendingDto;
     onRevoke: (invitationId: string) => void;
     isRevoking: boolean;
 }) {
@@ -476,20 +434,17 @@ export function ClientMembers({ id, canManageMembers }: ClientMembersProps) {
     const [removeTarget, setRemoveTarget] = useState<MemberOfClientDto | null>(null);
     const [revokingId, setRevokingId] = useState<string | null>(null);
 
-    // TODO: thay fake data bằng hook thực khi có API
-    // const { data: members = [] } = useClientMembers(id);
-    // const { data: pendingInvitations = [] } = usePendingInvitations(id);
     const { data: members = [] } = useClientMembers(id);
-    // const pendingInvitations = canManageMembers ? FAKE_PENDING : [];
     const { data: pendingInvitations = [] } = useClientMemberIsPending(id);
 
     const sendInvitation = useSendInvitation(id);
     const deleteInvitation = useDeleteInvitation(id);
     const updateRole = useUpdateClientMemberRole(id);
-    const removeMember = useRemoveClientMember(id);
+    // Truyền removeTarget?.userId vào hook, fallback "" khi chưa chọn
+    const removeMember = useRemoveClientMember(id, removeTarget?.userId ?? "");
 
     const handleRoleChange = (membershipId: string, role: "ADMIN" | "DEVELOPER") => {
-        updateRole.mutate({ membership_id: membershipId, role });
+        updateRole.mutate({ memberId: membershipId, role });
     };
 
     const handleRevoke = (invitationId: string) => {
@@ -501,7 +456,7 @@ export function ClientMembers({ id, canManageMembers }: ClientMembersProps) {
 
     const handleRemoveConfirm = () => {
         if (!removeTarget) return;
-        removeMember.mutate(removeTarget.userId, {
+        removeMember.mutate(undefined, {
             onSuccess: () => setRemoveTarget(null),
         });
     };

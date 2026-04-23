@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client"
-import { ClientCredentialsResponseDto, ClientMemberResponseDto, EnrollNewClientRequestDto, EnrollNewClientResponseDto, InviteUserRequest, MemberIsPendingDto, MemberOfClientDto, NewClientSecretResponseDto, UpdateClientRequestDto, UserSearchDto } from "@/types/api.types"
+import { ClientCredentialsResponseDto, ClientMemberResponseDto, EnrollNewClientRequestDto, EnrollNewClientResponseDto, InviteUserRequest, MemberIsPendingDto, MemberOfClientDto, NewClientSecretResponseDto, UpdateClientRequestDto, UpdateMemberRoleRequestDto, UserSearchDto } from "@/types/api.types"
 
 export const developerService = {
     enrollNewClient: (data: EnrollNewClientRequestDto) => apiClient.post<EnrollNewClientResponseDto>("/developer/enroll", data),
@@ -29,4 +29,10 @@ export const developerService = {
 
     inviteUserToClient: (client_id: string, data: InviteUserRequest) =>
         apiClient.post(`developer/${client_id}/invitations`, data),
+
+    updateMemberRole: (client_id: string, data: UpdateMemberRoleRequestDto) =>
+        apiClient.patch(`/developer/client-members/${client_id}/role/update`, data),
+
+    deleteMemberRole: (client_id: string, member_id: string) =>
+        apiClient.post(`/developer/client-members/${client_id}/role/${member_id}`),
 }
