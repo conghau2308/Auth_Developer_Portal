@@ -13,7 +13,7 @@ export function Breadcrumb({ crumbs }: BreadcrumbProps) {
     return (
         <nav
             className="flex items-center gap-1.5 mb-5 text-[12.5px]"
-            style={{ color: "var(--ol-muted)" }}
+            style={{ color: "var(--kw-muted)" }}
         >
             {crumbs.map((crumb, i) => (
                 <span key={i} className="flex items-center gap-1.5">
@@ -33,10 +33,8 @@ export function Breadcrumb({ crumbs }: BreadcrumbProps) {
                     {crumb.href ? (
                         <Link
                             href={crumb.href}
-                            className="transition-colors"
-                            style={{ color: "var(--ol-muted)", textDecoration: "none" }}
-                            onMouseEnter={e => (e.currentTarget.style.color = "var(--kw-brand-light)")}
-                            onMouseLeave={e => (e.currentTarget.style.color = "var(--ol-muted)")}
+                            className="text-[--kw-muted] hover:text-[--kw-brand-light] transition-colors no-underline"
+                            style={{ textDecoration: "none" }}
                         >
                             {crumb.label}
                         </Link>
