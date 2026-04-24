@@ -1,4 +1,3 @@
-import { ConsentedApp } from "@/types/common.types";
 import { Card, CardHead } from "../ui/card";
 import { ConsentItem } from "./consent-item";
 import { AuthorizedApplication } from "@/types/api.types";
@@ -11,7 +10,7 @@ export function ConsentList({ apps }: { apps: AuthorizedApplication[] }) {
                     <div className="text-[40px] mb-3.5">🔒</div>
                     <h3
                         className="text-[16px] font-semibold mb-1.5"
-                        style={{ fontFamily: "'Syne', sans-serif", color: "#e8e8ed" }}
+                        style={{ fontFamily: "'Syne', sans-serif", color: "var(--kw-text-strong)" }}
                     >
                         Chưa có ứng dụng nào
                     </h3>

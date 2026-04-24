@@ -15,8 +15,8 @@ import {
 } from "lucide-react";
 import { BiometricScanner } from "@/components/layout/biometric-scanner";
 import { useLogin } from "@/hooks/use-auth";
-import { set } from "zod";
 import { useRouter } from "next/navigation";
+import { Navbar } from "@/components/layout/navbar";
 
 type Step = "username" | "biometric";
 
@@ -35,7 +35,6 @@ export default function LoginPage() {
     setBiometricDone(true);
   }, []);
 
-  // Khi user nhấn "Chụp lại" bên trong BiometricScanner → reset cờ
   const handleBiometricReset = useCallback(() => {
     setBiometricDone(false);
     setFaceBase64(null);
@@ -49,33 +48,25 @@ export default function LoginPage() {
         setUsername("");
         setFaceBase64(null);
         setBiometricDone(false);
-        setStep("username");
+        // Để UI vẫn giữ tránh giật lag UI
+        // setStep("username");
         router.back();
       }
-    })
-  }
+    });
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
-      {/* Header */}
-      <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-border">
-        <div className="flex justify-between items-center px-6 py-5 max-w-7xl mx-auto">
-          <Link href="/" className="text-xl font-black tracking-tighter text-primary">
-            The Obsidian Lens
-          </Link>
-          <div className="flex items-center gap-2">
-            <ShieldCheck size={14} className="text-primary" />
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">
-              Secure Session
-            </span>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-grow flex items-center justify-center px-6 py-20 relative">
         {/* Ambient glow */}
         <div className="absolute inset-0 biometric-pulse pointer-events-none opacity-60" />
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+        {/* bg-primary/5 → kw-brand-soft */}
+        <div
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-[100px] pointer-events-none"
+          style={{ background: "var(--kw-brand-soft)" }}
+        />
 
         <div className="w-full max-w-md z-10 flex flex-col gap-6">
           {/* Step indicator */}
@@ -85,12 +76,17 @@ export default function LoginPage() {
                 Sign In
               </p>
               <h2 className="text-foreground font-bold text-lg">
-                {step === "username" ? "Step 1 of 2 — Identity" : "Step 2 of 2 — Face Verification"}
+                {step === "username"
+                  ? "Step 1 of 2 — Identity"
+                  : "Step 2 of 2 — Face Verification"}
               </h2>
             </div>
             <div className="flex gap-1.5">
               <div className="h-1 w-8 rounded-full bg-primary" />
-              <div className={`h-1 w-8 rounded-full transition-colors duration-500 ${step === "biometric" ? "bg-primary" : "bg-muted"}`} />
+              <div
+                className={`h-1 w-8 rounded-full transition-colors duration-500 ${step === "biometric" ? "bg-primary" : "bg-muted"
+                  }`}
+              />
             </div>
           </div>
 
@@ -100,8 +96,8 @@ export default function LoginPage() {
               {/* ── STEP 1: USERNAME ── */}
               <div
                 className={`transition-all duration-500 ${step === "username"
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 -translate-y-4 absolute pointer-events-none"
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 -translate-y-4 absolute pointer-events-none"
                   }`}
               >
                 {step === "username" && (
@@ -129,8 +125,12 @@ export default function LoginPage() {
                           placeholder="your_username"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && canProceed && setStep("biometric")}
-                          className="pl-11 py-6 bg-background border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-primary rounded-xl"
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && canProceed && setStep("biometric")
+                          }
+                          // border-border → kw-border token
+                          className="pl-11 py-6 bg-background text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-primary rounded-xl"
+                          style={{ borderColor: "var(--kw-border)" }}
                           autoFocus
                         />
                       </div>
@@ -139,7 +139,9 @@ export default function LoginPage() {
                     <Button
                       disabled={!canProceed}
                       onClick={() => setStep("biometric")}
-                      className="w-full py-6 rounded-xl primary-gradient text-primary-foreground font-bold text-base active:scale-95 transition-all shadow-lg shadow-primary/20 border-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2"
+                      // shadow-primary/20 → kw-brand-glow token
+                      className="w-full py-6 rounded-xl btn-brand-gradient font-bold text-base active:scale-95 transition-all border-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2"
+                      style={{ boxShadow: "0 10px 30px var(--kw-brand-glow)" }}
                     >
                       Continue to Face Scan
                       <ArrowRight size={18} />
@@ -151,8 +153,8 @@ export default function LoginPage() {
               {/* ── STEP 2: BIOMETRIC ── */}
               <div
                 className={`transition-all duration-500 ${step === "biometric"
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-4 absolute pointer-events-none"
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-4 absolute pointer-events-none"
                   }`}
               >
                 {step === "biometric" && (
@@ -196,7 +198,9 @@ export default function LoginPage() {
                     <Button
                       disabled={!biometricDone || !faceBase64 || !canProceed}
                       onClick={handleRegister}
-                      className="w-full py-6 rounded-xl primary-gradient text-primary-foreground font-bold text-base active:scale-95 transition-all shadow-[0_10px_30px_hsl(var(--primary)/0.3)] border-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:scale-100"
+                      // hsl(var(--primary)/0.3) → kw-brand-glow token
+                      className="w-full py-6 rounded-xl btn-brand-gradient font-bold text-base active:scale-95 transition-all border-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:scale-100"
+                      style={{ boxShadow: "0 10px 30px var(--kw-brand-glow)" }}
                     >
                       Sign In
                     </Button>
@@ -214,7 +218,12 @@ export default function LoginPage() {
             ].map(({ icon: Icon, label }) => (
               <div
                 key={label}
-                className="bg-muted/20 px-4 py-2 rounded-full flex items-center gap-2 border border-border"
+                // bg-muted/20 → kw-slate-soft | border-border → kw-border
+                className="px-4 py-2 rounded-full flex items-center gap-2 border"
+                style={{
+                  background: "var(--kw-slate-soft)",
+                  borderColor: "var(--kw-border)",
+                }}
               >
                 <Icon size={14} className="text-muted-foreground" />
                 <span className="text-xs text-muted-foreground font-semibold">

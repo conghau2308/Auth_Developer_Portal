@@ -30,15 +30,17 @@ export const useLogout = () => {
     return useMutation({
         mutationFn: authService.logout,
         onSuccess: () => {
-            queryClient.setQueryData(['auth', 'me'], null); // ✅ Navbar thấy ngay
-            queryClient.cancelQueries({ queryKey: ['auth'] }); // ✅ Hủy fetch đang chạy
-            queryClient.removeQueries({ queryKey: ['auth'] }); // ✅ Xóa cache
-            // router.push('/login');
+            // Chỉ SET null, KHÔNG remove → tránh trigger refetch
+            queryClient.setQueryData(['auth', 'me'], null);
+
+            // Cancel mọi query đang pending liên quan auth
+            queryClient.cancelQueries({ queryKey: ['auth'] });
+
+            router.push('/login'); // Navigate SAU khi set state
         },
         onError: () => {
-            // Dù logout API fail cũng clear local state
             queryClient.setQueryData(['auth', 'me'], null);
-            queryClient.removeQueries({ queryKey: ['auth'] });
+            queryClient.cancelQueries({ queryKey: ['auth'] });
             router.push('/login');
         }
     });

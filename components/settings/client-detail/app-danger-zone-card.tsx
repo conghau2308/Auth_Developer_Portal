@@ -23,7 +23,7 @@ export function AppDangerZoneCard({ app }: AppDangerZoneCardProps) {
             onSuccess: () => {
                 setOpen(false);
                 toast.success("Đã xóa OAuth App thành công.");
-                router.push("/settings/developer")
+                router.push("/settings/developer");
             }
         });
     };
@@ -34,14 +34,14 @@ export function AppDangerZoneCard({ app }: AppDangerZoneCardProps) {
                 <CardHead title="Vùng nguy hiểm" danger />
                 <CardBody className="flex items-center justify-between">
                     <div>
-                        <p className="text-[13.5px] font-medium" style={{ color: "#e8e8ed" }}>
+                        <p className="text-[13.5px] font-medium" style={{ color: "var(--kw-text-strong)" }}>
                             Xóa ứng dụng
                         </p>
-                        <p className="text-[12px] mt-0.5" style={{ color: "var(--ol-muted)" }}>
+                        <p className="text-[12px] mt-0.5" style={{ color: "var(--kw-muted)" }}>
                             Xóa vĩnh viễn ứng dụng. Tất cả token liên quan sẽ bị thu hồi.
                         </p>
                     </div>
-                    <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
+                    <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
                         Xóa ứng dụng
                     </Button>
                 </CardBody>
@@ -50,10 +50,7 @@ export function AppDangerZoneCard({ app }: AppDangerZoneCardProps) {
             <Modal open={open} onClose={() => setOpen(false)} title="Xóa OAuth App?">
                 <ModalBody>
                     Ứng dụng{" "}
-                    <strong style={{ color: "#e8e8ed" }}>{app.clientName}</strong> sẽ bị xóa vĩnh viễn.
-                    {/* Tất cả token, secret và consent của{" "}
-                    <strong style={{ color: "#e8e8ed" }}>{app.userCount} users</strong> sẽ bị thu
-                    hồi ngay lập tức. */}
+                    <strong style={{ color: "var(--kw-text-strong)" }}>{app.clientName}</strong> sẽ bị xóa vĩnh viễn.
                 </ModalBody>
                 <ModalActions>
                     <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
@@ -63,7 +60,7 @@ export function AppDangerZoneCard({ app }: AppDangerZoneCardProps) {
                         variant="destructive"
                         size="sm"
                         onClick={handleDelete}
-                        disabled={deleteClient.isPending} // ← thêm vào
+                        disabled={deleteClient.isPending}
                     >
                         {deleteClient.isPending ? "Đang xóa..." : "Xác nhận xóa"}
                     </Button>

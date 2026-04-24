@@ -1,157 +1,221 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth, useLogout } from "@/hooks/use-auth";
-import { LogOut, Settings, UserRound } from "lucide-react";
+import { ChevronDown, KeyRound, LogOut, Settings, UserRound } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-export function Navbar() {
-    const { data: user, isLoading, fetchStatus, status } = useAuth();
+/* ── Logo mark ── */
+function LogoMark() {
+    return (
+        <Link href="/">
+            <div className="flex items-center gap-2.5">
+                {/* Đổi btn-cyan-gradient thành btn-brand-gradient */}
+                <div className="w-7 h-7 rounded-[7px] btn-brand-gradient flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <KeyRound size={14} className="text-white" strokeWidth={2.5} />
+                </div>
+                {/* Dùng text-strong để nét chữ đanh hơn */}
+                <span className="text-[16px] font-black tracking-tight text-strong">
+                    WiFa<span className="text-primary">Key</span>
+                </span>
+            </div>
+        </Link>
+    );
+}
 
-    console.log('🔍 Navbar re-render:', {
-        user: user ?? 'null/undefined',
-        isLoading,
-        fetchStatus,
-        status,
-        showSkeleton: isLoading && fetchStatus === 'fetching',
-        time: new Date().toISOString(),
-    });
+/* ── Nav links ── */
+function NavLinks() {
+    return (
+        <nav className="hidden md:flex items-center gap-1.5">
+            {[
+                { label: "Docs", href: "/docs", active: true, badge: "v2" },
+                { label: "Guides", href: "/guides" },
+                { label: "Status", href: "/status" },
+            ].map(({ label, href, active, badge }) => (
+                <Link
+                    key={href}
+                    href={href}
+                    className={[
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-bold transition-colors",
+                        active
+                            ? "text-primary bg-primary/10"
+                            /* Đổi hover:bg-white/5 thành hover:bg-primary/5 để hợp Light/Dark */
+                            : "text-body dark:text-muted-foreground hover:text-primary hover:bg-primary/5",
+                    ].join(" ")}
+                >
+                    {label}
+                    {badge && (
+                        <span className="text-[9px] font-black bg-primary/15 text-primary rounded px-1.5 py-0.5 tracking-[0.05em] uppercase">
+                            {badge}
+                        </span>
+                    )}
+                </Link>
+            ))}
+        </nav>
+    );
+}
 
-    const showSkeleton = isLoading && fetchStatus === 'fetching';
-    console.log('showSkeleton:', showSkeleton);
+/* ── User dropdown ── */
+function UserMenu({ user }: { user: NonNullable<ReturnType<typeof useAuth>["data"]> }) {
     const logout = useLogout();
-
-    // Lấy 2 chữ cái đầu của tên, nếu không có tên thì lấy từ email, mặc định là "U"
-    const initials = (user?.name || user?.email || "User").slice(0, 2).toUpperCase();
+    const initials = (user.name || user.email || "U").slice(0, 2).toUpperCase();
+    const displayName = user.name || "User";
+    const shortName = displayName.split(" ")[0];
 
     return (
-        <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border transition-all duration-300">
-            <div className="flex justify-between items-center px-8 py-3 max-w-screen-2xl mx-auto">
+        <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+                {/* Sửa lại background và border để nổi bật trên Light Mode */}
+                <Button
+                    className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full
+                     border border-slate-200 dark:border-border bg-slate-50 dark:bg-muted/30
+                     hover:bg-slate-100 dark:hover:bg-muted/50 hover:border-primary/30
+                     transition-all duration-200 shadow-sm
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                >
+                    <Avatar className="h-[28px] w-[28px] shadow-sm">
+                        <AvatarImage src={user.avatar} alt={displayName} />
+                        <AvatarFallback className="avatar-gradient text-white text-[11px] font-black">
+                            {initials}
+                        </AvatarFallback>
+                    </Avatar>
+                    <span className="text-[13px] font-bold text-strong hidden sm:block">
+                        {shortName}
+                    </span>
+                    <ChevronDown size={14} className="text-muted-foreground" />
+                </Button>
+            </DropdownMenuTrigger>
 
-                {/* Logo */}
-                <div className="text-2xl font-black text-primary tracking-tight">
-                    The Obsidian Lens
-                </div>
+            <DropdownMenuContent
+                align="end"
+                sideOffset={10}
+                className="
+                  w-56 rounded-xl p-1.5
+                  bg-white dark:bg-card text-strong
+                  border border-slate-200 dark:border-border 
+                  shadow-xl shadow-black/10 dark:shadow-black/50
+                  animate-fade-slide
+                "
+            >
+                {/* Header */}
+                <DropdownMenuLabel className="font-normal px-2.5 py-2.5">
+                    <p className="text-[10px] font-bold text-body/60 dark:text-muted-foreground/60 uppercase tracking-[0.07em] mb-1">
+                        Signed in as
+                    </p>
+                    <p className="text-[14px] font-black text-strong leading-none truncate mb-1">
+                        {displayName}
+                    </p>
+                    <p className="text-[12px] font-medium text-body dark:text-muted-foreground truncate">
+                        {user.email}
+                    </p>
+                </DropdownMenuLabel>
 
-                {/* Nav Links */}
-                <div className="hidden md:flex items-center gap-8">
-                    <Link
-                        href="#"
-                        className="text-primary border-b-2 border-primary pb-1 font-bold tracking-tight text-sm"
-                    >
-                        Docs
+                <DropdownMenuSeparator className="bg-slate-100 dark:bg-border mx-1 my-1" />
+
+                {/* Profile */}
+                <DropdownMenuItem asChild className="
+                  cursor-pointer rounded-lg mx-0.5 px-2.5 py-2
+                  text-body dark:text-muted-foreground font-medium
+                  hover:bg-primary/10 hover:text-primary
+                  focus:bg-primary/10 focus:text-primary
+                  transition-colors outline-none
+                ">
+                    <Link href="settings/profile" className="flex items-center gap-2.5 w-full">
+                        <UserRound size={15} />
+                        <span className="text-[13px]">Profile</span>
                     </Link>
-                    <Link
-                        href="#"
-                        className="text-muted-foreground hover:text-primary transition-colors font-bold tracking-tight text-sm"
-                    >
-                        Pricing
-                    </Link>
-                </div>
+                </DropdownMenuItem>
 
-                {/* Auth Area */}
+                {/* Settings */}
+                <DropdownMenuItem asChild className="
+                  cursor-pointer rounded-lg mx-0.5 px-2.5 py-2
+                  text-body dark:text-muted-foreground font-medium
+                  hover:bg-slate-100 dark:hover:bg-[var(--kw-slate-soft)] hover:text-strong dark:hover:text-foreground
+                  focus:bg-slate-100 dark:focus:bg-[var(--kw-slate-soft)] focus:text-strong dark:focus:text-foreground
+                  transition-colors outline-none
+                ">
+                    <Link href="/settings/applications" className="flex items-center gap-2.5 w-full">
+                        <Settings size={15} />
+                        <span className="text-[13px]">Settings</span>
+                    </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator className="bg-slate-100 dark:bg-border mx-1 my-1" />
+
+                {/* Sign out */}
+                <DropdownMenuItem
+                    onClick={() => logout.mutate()}
+                    disabled={logout.isPending}
+                    className="
+                      cursor-pointer rounded-lg mx-0.5 px-2.5 py-2
+                      text-destructive/90 font-medium
+                      hover:bg-destructive/10 hover:text-destructive
+                      focus:bg-destructive/10 focus:text-destructive
+                      flex items-center gap-2.5 transition-colors outline-none
+                    "
+                >
+                    <LogOut size={15} />
+                    <span className="text-[13px]">
+                        {logout.isPending ? "Signing out…" : "Sign out"}
+                    </span>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+}
+
+/* ── Main Navbar ── */
+export function Navbar() {
+    const { data: user, isLoading, fetchStatus } = useAuth();
+    // Chỉ show skeleton khi THỰC SỰ đang fetch lần đầu
+    // data === undefined: chưa có data bao giờ
+    // data === null: đã biết là logged out
+    const showSkeleton = isLoading && fetchStatus === "fetching" && user === undefined;
+
+    return (
+        <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-lg border-b border-border/50 navbar-glow-border transition-all duration-300">
+            <div className="flex justify-between items-center px-6 md:px-8 py-0 h-[60px] max-w-screen-xl mx-auto">
+
+                <LogoMark />
+                <NavLinks />
+
+                {/* Auth area */}
                 <div className="flex items-center gap-3">
                     {showSkeleton ? (
-                        /* Skeleton loading cho Avatar */
-                        <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
+                        <div className="h-9 w-28 rounded-full bg-slate-200 dark:bg-muted animate-pulse" />
                     ) : user ? (
-                        <DropdownMenu modal={false}>
-                            <DropdownMenuTrigger asChild>
-                                <button className="rounded-full outline-none ring-offset-background transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                                    <Avatar className="h-9 w-9">
-                                        <AvatarImage src={user.avatar} alt={user.name || "User"} />
-                                        <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-                                            {initials}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                </button>
-                            </DropdownMenuTrigger>
-
-                            <DropdownMenuContent
-                                align="end"
-                                sideOffset={8}
-                                /* Đảm bảo bg-background và text-foreground để không bị trùng màu chữ */
-                                className="w-56 rounded-xl border-border/40 shadow-xl p-1.5 bg-background text-foreground"
-                            >
-                                {/* Header */}
-                                <DropdownMenuLabel className="font-normal p-2">
-                                    <div className="flex flex-col space-y-1">
-                                        <p className="text-xs text-muted-foreground mb-0.5">
-                                            Signed in as
-                                        </p>
-                                        <p className="text-sm font-bold text-foreground leading-none truncate">
-                                            {user.name || "User"}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground truncate">
-                                            {user.email || "user email"}
-                                        </p>
-                                    </div>
-                                </DropdownMenuLabel>
-
-                                <DropdownMenuSeparator className="bg-border/50 mx-1" />
-
-                                {/* Profile Item - Bổ sung hover:bg và hover:text */}
-                                <DropdownMenuItem asChild onClick={() => console.log("user data", user)} className="cursor-pointer rounded-md mx-1 my-0.5 px-2.5 py-2 hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary transition-colors outline-none">
-                                    <Link href="#" className="flex items-center gap-2.5 w-full">
-                                        <UserRound size={16} />
-                                        <span className="font-medium text-sm">Profile</span>
-                                    </Link>
-                                </DropdownMenuItem>
-
-                                <DropdownMenuSeparator className="bg-border/50 mx-1" />
-
-                                {/* Logout Item - Bổ sung hover:bg và hover:text */}
-                                <DropdownMenuItem
-                                    onClick={() => logout.mutate()}
-                                    disabled={logout.isPending}
-                                    className="cursor-pointer rounded-md mx-1 my-0.5 px-2.5 py-2 text-destructive hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive flex items-center gap-2.5 transition-colors outline-none"
-                                >
-                                    <LogOut size={16} />
-                                    <span className="font-medium text-sm">
-                                        {logout.isPending ? "Logging out..." : "Log out"}
-                                    </span>
-                                </DropdownMenuItem>
-
-                                <DropdownMenuItem asChild onClick={() => console.log("user data", user)} className="cursor-pointer rounded-md mx-1 my-0.5 px-2.5 py-2 hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary transition-colors outline-none">
-                                    <Link href="/settings" className="flex items-center gap-2.5 w-full">
-                                        <Settings size={16} />
-                                        <span className="font-medium text-sm">Settings</span>
-                                    </Link>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <UserMenu user={user} />
                     ) : (
                         <>
                             <Link href="/login">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-muted-foreground hover:text-primary font-bold"
-                                >
-                                    Login
+                                {/* Đổi hover:bg-white/5 thành hover:bg-muted/50 */}
+                                <Button className="text-[13px] font-bold text-body dark:text-muted-foreground hover:text-strong dark:hover:text-foreground px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-muted/50 transition-colors">
+                                    Sign in
                                 </Button>
                             </Link>
+
+                            {/* Divider */}
+                            <div className="w-px h-4 bg-slate-300 dark:bg-border/60 mx-1" />
+
                             <Link href="/sign-up">
-                                <Button
-                                    size="sm"
-                                    className="px-5 rounded-xl bg-primary text-primary-foreground font-bold active:scale-95 shadow-lg shadow-primary/20 hover:opacity-90 border-0"
-                                >
-                                    Sign Up
+                                {/* Đổi btn-cyan-gradient thành btn-brand-gradient */}
+                                <Button className="btn-brand-gradient text-[13px] font-bold px-5 py-2 rounded-lg active:scale-95 transition-all shadow-sm">
+                                    Get started
                                 </Button>
                             </Link>
                         </>
                     )}
                 </div>
-            </div >
-        </nav >
+            </div>
+        </header>
     );
 }

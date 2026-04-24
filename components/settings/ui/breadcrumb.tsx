@@ -33,13 +33,15 @@ export function Breadcrumb({ crumbs }: BreadcrumbProps) {
                     {crumb.href ? (
                         <Link
                             href={crumb.href}
-                            className="hover:text-[#a594ff] transition-colors"
+                            className="transition-colors"
                             style={{ color: "var(--ol-muted)", textDecoration: "none" }}
+                            onMouseEnter={e => (e.currentTarget.style.color = "var(--kw-brand-light)")}
+                            onMouseLeave={e => (e.currentTarget.style.color = "var(--ol-muted)")}
                         >
                             {crumb.label}
                         </Link>
                     ) : (
-                        <span style={{ color: "#e8e8ed" }}>{crumb.label}</span>
+                        <span style={{ color: "var(--kw-text-strong)" }}>{crumb.label}</span>
                     )}
                 </span>
             ))}

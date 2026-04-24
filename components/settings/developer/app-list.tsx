@@ -1,4 +1,3 @@
-import { OAuthApp } from "@/types/common.types";
 import { Card } from "../ui/card";
 import { AppItem } from "./app-item";
 import { ClientMemberResponseDto } from "@/types/api.types";
@@ -16,7 +15,7 @@ export function AppList({ apps }: AppListProps) {
                     <div className="text-[40px] mb-3.5">📦</div>
                     <h3
                         className="text-[16px] font-semibold mb-1.5"
-                        style={{ fontFamily: "'Syne', sans-serif", color: "#e8e8ed" }}
+                        style={{ fontFamily: "'Syne', sans-serif", color: "var(--kw-text-strong)" }}
                     >
                         Chưa có OAuth App nào
                     </h3>

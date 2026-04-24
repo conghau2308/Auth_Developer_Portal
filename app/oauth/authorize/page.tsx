@@ -89,9 +89,9 @@ export default function OAuthAuthorizePage() {
   if (isLoading) {
     return (
       <PageShell>
-        <div className="flex flex-col items-center justify-center gap-4 py-20">
-          <Loader2 size={32} className="animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Đang kiểm tra phiên đăng nhập…</p>
+        <div className="loading-center">
+          <Loader2 size={32} className="spinner-brand" />
+          <p className="loading-text">Đang kiểm tra phiên đăng nhập…</p>
         </div>
       </PageShell>
     );

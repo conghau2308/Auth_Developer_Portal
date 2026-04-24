@@ -1,4 +1,3 @@
-import { DeveloperCTA } from "@/components/home/developer-cta";
 import { FeatureGrid } from "@/components/home/feature-grid";
 import { HeroSection } from "@/components/home/hero-section";
 import { Footer } from "@/components/layout/footer";
@@ -12,7 +11,6 @@ export default function HomePage() {
       <main>
         <HeroSection />
         <FeatureGrid />
-        <DeveloperCTA />
       </main>
       <Footer />
     </>

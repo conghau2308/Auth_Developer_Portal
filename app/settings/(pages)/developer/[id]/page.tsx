@@ -5,59 +5,11 @@ import { AppSettingsCard } from "@/components/settings/client-detail/app-setting
 import { ClientCredentials } from "@/components/settings/client-detail/client-credentials";
 import { ClientHeaderCard } from "@/components/settings/client-detail/client-header-card";
 import { ClientMembers } from "@/components/settings/client-detail/client-member";
-import { StatsCard } from "@/components/settings/client-detail/stats-card";
 import { Breadcrumb } from "@/components/settings/ui/breadcrumb";
 import { useClientCredentials } from "@/hooks/use-developer";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { use } from "react";
 
-// // ── Static data store (replace with DB fetch) ───────────────────
-// const APPS_DB: Record<string, OAuthApp> = {
-//     "my-web-app": {
-//         id: "my-web-app",
-//         name: "My Web Application",
-//         clientId: "my-web-app-client",
-//         homepageUrl: "https://myapp.example.com",
-//         redirectUri: "https://myapp.example.com/callback",
-//         iconUrl: "🛒",
-//         clientType: "confidential",
-//         createdAt: "01/04/2026",
-//         userCount: 3,
-//         role: "OWNER",
-//     },
-//     "mobile-client": {
-//         id: "mobile-client",
-//         name: "Mobile Client",
-//         clientId: "mobile-client-v2",
-//         homepageUrl: "https://mobile.example.com",
-//         redirectUri: "myapp://callback",
-//         iconUrl: "📱",
-//         clientType: "public",
-//         createdAt: "15/03/2026",
-//         userCount: 12,
-//         role: "DEVELOPER",
-//     }
-// };
-
-// const STATS_DB: Record<string, AppStats> = {
-//     "my-web-app": { activeUsers: 3, tokenExchanges: 142, activeSecrets: 2 },
-//     "mobile-client": { activeUsers: 12, tokenExchanges: 543, activeSecrets: 1 },
-// };
-
-// // ── Metadata ────────────────────────────────────────────────────
-// export async function generateMetadata({
-//     params,
-// }: {
-//     params: Promise<{ id: string }>;
-// }): Promise<Metadata> {
-//     const { id } = await params;
-//     const app = APPS_DB[id];
-//     return { title: app ? `${app.name} — Obsidian Lens IdP` : "App not found" };
-// }
-
-// ── Page ────────────────────────────────────────────────────────
-export default function ClientDetailPage({
+export default function ClientDetailContent({
     params,
 }: {
     params: Promise<{ id: string }>;
@@ -65,17 +17,34 @@ export default function ClientDetailPage({
     const { id } = use(params);
     const { data: app, isLoading, isError } = useClientCredentials(id);
 
+    // ── Trạng thái Đang tải ───────────────────────────────────────
     if (isLoading) {
-        return <div>Loading...</div>;
+        return (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+                <div className="w-10 h-10 rounded-full border-[4px] border-primary/10 border-t-primary animate-spin mb-4" />
+                <p className="text-[14px] font-bold text-body dark:text-muted-foreground animate-pulse">
+                    Đang truy xuất cấu hình ứng dụng...
+                </p>
+            </div>
+        );
     }
 
-    // Guard sau khi loading xong — app chắc chắn defined từ đây trở xuống
+    // ── Trạng thái Lỗi ────────────────────────────────────────────
     if (isError || !app) {
-        return <div>Không tìm thấy ứng dụng.</div>;
+        return (
+            <div className="py-12 px-6 rounded-2xl border border-destructive/20 bg-destructive/5 text-center">
+                <div className="text-3xl mb-3">⚠️</div>
+                <h3 className="text-[16px] font-black text-destructive mb-1">Không tìm thấy ứng dụng</h3>
+                <p className="text-[13px] font-medium text-body dark:text-muted-foreground">
+                    Ứng dụng không tồn tại hoặc bạn không có quyền truy cập.
+                </p>
+            </div>
+        );
     }
 
     return (
-        <>
+        <div className="animate-fade-slide flex flex-col gap-6 pb-20">
+            {/* Breadcrumb - Cần đảm bảo component này dùng text-primary */}
             <Breadcrumb
                 crumbs={[
                     { label: "OAuth Apps", href: "/settings/developer" },
@@ -83,20 +52,36 @@ export default function ClientDetailPage({
                 ]}
             />
 
+            {/* Header Card - Thông tin tổng quan */}
             <ClientHeaderCard app={app} />
-            <ClientMembers
-                id={app.id}
-                canManageMembers={app.role === "OWNER" || app.role === "ADMIN"}
-            />
-            <ClientCredentials
-                id={app.id}
-                clientId={app.clientId}
-                canManageSecrets={app.role === "OWNER" || app.role === "ADMIN"}
-                secrets={app.clientSecrets}
-            />
-            <AppSettingsCard app={app} />
 
-            {app.role === "OWNER" && <AppDangerZoneCard app={app} />}
-        </>
+            {/* Grid chia 2 cột cho thông tin chi tiết (Tùy chọn nếu muốn Dashboard gọn hơn) */}
+            <div className="grid grid-cols-1 gap-6">
+
+                {/* Members - Quản lý thành viên */}
+                <ClientMembers
+                    id={app.id}
+                    canManageMembers={app.role === "OWNER" || app.role === "ADMIN"}
+                />
+
+                {/* Credentials - Client ID & Secrets */}
+                <ClientCredentials
+                    id={app.id}
+                    clientId={app.clientId}
+                    canManageSecrets={app.role === "OWNER" || app.role === "ADMIN"}
+                    secrets={app.clientSecrets}
+                />
+
+                {/* Settings - Cấu hình URL Redirect, v.v. */}
+                <AppSettingsCard app={app} />
+
+                {/* Danger Zone - Chỉ hiện cho chủ sở hữu */}
+                {app.role === "OWNER" && (
+                    <div className="mt-4">
+                        <AppDangerZoneCard app={app} />
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

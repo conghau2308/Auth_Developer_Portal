@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface AccountSelectorProps {
     user: { name: string; email: string };
@@ -19,39 +19,59 @@ export function AccountSelector({
 }: AccountSelectorProps) {
     return (
         <div className="space-y-6">
+
+            {/* Eyebrow + title — cùng pattern các screen khác */}
             <div className="px-1">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold">Chọn tài khoản</p>
-                <h2 className="text-foreground font-bold text-lg">Tiếp tục đến {clientName}</h2>
+                <p
+                    className="text-[10px] uppercase font-bold text-[var(--kw-brand)]"
+                    style={{ letterSpacing: "0.2em" }}
+                >
+                    Chọn tài khoản
+                </p>
+                <h2 className="font-bold text-lg text-[var(--kw-text-strong)]">
+                    Tiếp tục đến {clientName}
+                </h2>
             </div>
 
-            <div className="bg-card rounded-[2rem] p-8 shadow-2xl space-y-6">
-                <button
+            {/* Card */}
+            <div className="bg-[var(--kw-bg2)] rounded-[2rem] p-8 shadow-2xl space-y-6">
+
+                {/* Account row */}
+                <Button
                     onClick={onSelect}
-                    className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group text-left"
+                    className="w-full flex items-center gap-4 p-10 rounded-2xl border border-[var(--kw-border)] hover:border-[var(--kw-brand-glow)] hover:bg-[var(--kw-brand-soft)] transition-all group text-left cursor-pointer"
                 >
-                    <div className="w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center font-bold text-primary text-sm flex-shrink-0">
+                    <div
+                        className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
+                        style={{ background: "var(--kw-brand-soft)", color: "var(--kw-brand)" }}
+                    >
                         {getInitials(user.name)}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-foreground truncate">{user.name}</p>
-                        <p className="text-xs text-muted-foreground">{user.email} · Đã đăng nhập</p>
+                        <p className="font-semibold text-[var(--kw-text-strong)] truncate">{user.name}</p>
+                        <p className="text-xs text-[var(--kw-text-muted)]">{user.email} · Đã đăng nhập</p>
                     </div>
-                    <ChevronRight size={18} className="text-muted-foreground group-hover:text-primary transition-colors" />
-                </button>
+                    <ChevronRight
+                        size={18}
+                        className="transition-colors text-[var(--kw-text-muted)] group-hover:text-[var(--kw-brand)]"
+                    />
+                </Button>
 
+                {/* Divider */}
                 <div className="flex items-center gap-3">
-                    <div className="flex-1 h-px bg-border" />
-                    <span className="text-xs text-muted-foreground">hoặc</span>
-                    <div className="flex-1 h-px bg-border" />
+                    <div className="flex-1 h-px bg-[var(--kw-border)]" />
+                    <span className="text-xs text-[var(--kw-text-muted)]">hoặc</span>
+                    <div className="flex-1 h-px bg-[var(--kw-border)]" />
                 </div>
 
+                {/* Switch account — outline, không dùng btn-brand-gradient */}
                 <Button
-                    variant="outline"
                     onClick={onSwitchAccount}
-                    className="w-full py-5 rounded-xl border-border text-foreground font-semibold"
+                    className="w-full py-5 rounded-xl font-semibold border border-[var(--kw-border)] text-[var(--kw-text-strong)] bg-transparent hover:bg-[var(--kw-bg3)] transition-colors cursor-pointer"
                 >
                     Dùng tài khoản khác
                 </Button>
+
             </div>
         </div>
     );

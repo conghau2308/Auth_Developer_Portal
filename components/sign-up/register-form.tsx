@@ -177,7 +177,7 @@ export function RegisterForm({ defaultValues, onNext }: RegisterFormProps) {
                         <Button
                             type="submit"
                             disabled={usernameStatus === "taken" || usernameStatus === "checking"}
-                            className="w-full py-6 rounded-xl primary-gradient text-primary-foreground font-bold text-sm tracking-wide shadow-lg shadow-primary/10 hover:shadow-primary/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all duration-200 flex items-center justify-center gap-3 border-0"
+                            className="w-full py-6 rounded-xl btn-brand-gradient text-primary-foreground font-bold text-sm tracking-wide shadow-lg shadow-primary/10 hover:shadow-primary/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all duration-200 flex items-center justify-center gap-3 border-0"
                         >
                             Next: Face Enrollment <ArrowRight size={18} />
                         </Button>

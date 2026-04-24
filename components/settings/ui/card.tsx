@@ -12,10 +12,10 @@ export function Card({ children, className, danger }: CardProps) {
         <div
             className={cn("rounded-[10px] overflow-hidden mb-4", className)}
             style={{
-                background: "var(--ol-bg2)",
+                background: "var(--kw-bg2)",
                 border: danger
-                    ? "1px solid rgba(255,77,77,0.25)"
-                    : "1px solid var(--ol-border)",
+                    ? "1px solid var(--kw-danger-border)"
+                    : "1px solid var(--kw-border)",
             }}
         >
             {children}
@@ -37,8 +37,8 @@ export function CardHead({ title, description, action, danger }: CardHeadProps) 
             className="flex items-center justify-between px-5 py-4"
             style={{
                 borderBottom: danger
-                    ? "1px solid rgba(255,77,77,0.15)"
-                    : "1px solid var(--ol-border)",
+                    ? "1px solid var(--kw-danger-border-soft)"
+                    : "1px solid var(--kw-border)",
             }}
         >
             <div>
@@ -46,13 +46,13 @@ export function CardHead({ title, description, action, danger }: CardHeadProps) 
                     className="text-sm font-semibold"
                     style={{
                         fontFamily: "'Syne', sans-serif",
-                        color: danger ? "var(--ol-danger)" : "var(--ol-text, #e8e8ed)",
+                        color: danger ? "var(--kw-danger)" : "var(--kw-text-strong)",
                     }}
                 >
                     {title}
                 </h3>
                 {description && (
-                    <p className="text-xs mt-0.5" style={{ color: "var(--ol-muted)" }}>
+                    <p className="text-xs mt-0.5" style={{ color: "var(--kw-muted)" }}>
                         {description}
                     </p>
                 )}
@@ -85,11 +85,11 @@ export function CardFooter({
         <div
             className="flex items-center justify-between px-5 py-3"
             style={{
-                background: "var(--ol-bg3)",
-                borderTop: "1px solid var(--ol-border)",
+                background: "var(--kw-bg3)",
+                borderTop: "1px solid var(--kw-border)",
             }}
         >
-            <p className="text-xs" style={{ color: "var(--ol-muted)" }}>
+            <p className="text-xs" style={{ color: "var(--kw-muted)" }}>
                 {note ?? ""}
             </p>
             {children}

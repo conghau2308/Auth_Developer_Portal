@@ -45,13 +45,13 @@ const ROLE_STYLE: Record<"OWNER" | "ADMIN" | "DEVELOPER", React.CSSProperties> =
     DEVELOPER: { background: "#EAF3DE", color: "#27500A" },
 };
 
-// ── Avatar ───────────────────────────────────────────────────────
+// ── Avatar component ─────────────────────────────────────────────
 function Avatar({ name, avatar, size = 32 }: { name: string; avatar?: string; size?: number }) {
     return (
         <div
             style={{
                 width: size, height: size, borderRadius: "50%",
-                background: "#E6F1FB", color: "#0C447C",
+                background: "var(--kw-avatar-bg)", color: "var(--kw-avatar-color)",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 fontSize: size * 0.38, fontWeight: 500, flexShrink: 0, overflow: "hidden",
             }}
@@ -85,17 +85,17 @@ function MemberRow({
     const isOwner = member.role === "OWNER";
 
     return (
-        <div className="flex items-center gap-3 py-3" style={{ borderBottom: "0.5px solid var(--ol-border)" }}>
+        <div className="flex items-center gap-3 py-3" style={{ borderBottom: "0.5px solid var(--kw-border)" }}>
             <Avatar name={member.name} avatar={member.avatar} size={34} />
 
             <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-medium m-0 truncate">{member.name}</p>
-                <p className="text-[11.5px] m-0 truncate" style={{ color: "var(--ol-muted)" }}>
+                <p className="text-[11.5px] m-0 truncate" style={{ color: "var(--kw-muted)" }}>
                     {member.email}
                 </p>
             </div>
 
-            <p className="text-[11px] shrink-0 hidden sm:block" style={{ color: "var(--ol-muted)" }}>
+            <p className="text-[11px] shrink-0 hidden sm:block" style={{ color: "var(--kw-muted)" }}>
                 {formatDate(member.addedAt)}
             </p>
 
@@ -106,7 +106,7 @@ function MemberRow({
                     value={member.role}
                     onChange={(e) => onRoleChange(member.userId, e.target.value as "ADMIN" | "DEVELOPER")}
                     className="text-[12px] px-2 py-1 rounded-md"
-                    style={{ border: "0.5px solid var(--ol-border)", background: "var(--ol-bg3)", color: "inherit", cursor: "pointer" }}
+                    style={{ border: "0.5px solid var(--kw-border)", background: "var(--kw-bg3)", color: "inherit", cursor: "pointer" }}
                 >
                     <option value="ADMIN">Administrator</option>
                     <option value="DEVELOPER">Developer</option>
@@ -139,15 +139,15 @@ function PendingRow({
     return (
         <div
             className="flex items-center gap-3 py-3"
-            style={{ borderBottom: "0.5px solid var(--ol-border)", opacity: isRevoking ? 0.5 : 1 }}
+            style={{ borderBottom: "0.5px solid var(--kw-border)", opacity: isRevoking ? 0.5 : 1 }}
         >
             {/* Avatar placeholder — dùng initial từ email */}
             <div
                 style={{
                     width: 34, height: 34, borderRadius: "50%",
-                    background: "var(--ol-bg3)", border: "0.5px dashed var(--ol-border)",
+                    background: "var(--kw-bg3)", border: "0.5px dashed var(--kw-border)",
                     display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 13, color: "var(--ol-muted)", flexShrink: 0,
+                    fontSize: 13, color: "var(--kw-muted)", flexShrink: 0,
                 }}
             >
                 {invitation.inviteeEmail[0].toUpperCase()}
@@ -155,14 +155,14 @@ function PendingRow({
 
             <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-medium m-0 truncate">{invitation.inviteeEmail}</p>
-                <p className="text-[11.5px] m-0 truncate" style={{ color: "var(--ol-muted)" }}>
+                <p className="text-[11.5px] m-0 truncate" style={{ color: "var(--kw-muted)" }}>
                     Mời bởi {invitation.invitedByName} · Hết hạn {formatDate(invitation.expiresAt)}
                 </p>
             </div>
 
             <span
                 className="text-[11px] px-2 py-0.5 rounded-full font-medium shrink-0"
-                style={{ background: "var(--ol-bg3)", color: "var(--ol-muted)", border: "0.5px dashed var(--ol-border)" }}
+                style={{ background: "var(--kw-bg3)", color: "var(--kw-muted)", border: "0.5px dashed var(--kw-border)" }}
             >
                 Chờ xác nhận
             </span>
@@ -254,7 +254,7 @@ function SendInvitationModal({
             <ModalBody>
                 {/* Search input */}
                 <div className="mb-4">
-                    <label className="block text-[12px] mb-1.5" style={{ color: "var(--ol-muted)" }}>
+                    <label className="block text-[12px] mb-1.5" style={{ color: "var(--kw-muted)" }}>
                         {isEmailSearch ? "Tìm theo email" : "Tìm theo username"}
                     </label>
 
@@ -270,8 +270,8 @@ function SendInvitationModal({
                             }}
                             className="w-full text-[13px] px-3 py-2 rounded-md pr-8"
                             style={{
-                                border: "0.5px solid var(--ol-border)",
-                                background: "var(--ol-bg3)",
+                                border: "0.5px solid var(--kw-border)",
+                                background: "var(--kw-bg3)",
                                 color: "inherit",
                                 outline: "none",
                             }}
@@ -289,7 +289,7 @@ function SendInvitationModal({
                                     className="animate-spin"
                                     viewBox="0 0 24 24"
                                     fill="none"
-                                    style={{ color: "var(--ol-muted)" }}
+                                    style={{ color: "var(--kw-muted)" }}
                                 >
                                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
                                     <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
@@ -299,13 +299,14 @@ function SendInvitationModal({
 
                         {/* Dropdown */}
                         {shouldShowDropdown && (
+                            // ── Dropdown trong SendInvitationModal ───────────────────────────
                             <div
                                 ref={dropdownRef}
                                 className="absolute left-0 right-0 top-full mt-1 rounded-md overflow-hidden z-50"
                                 style={{
-                                    border: "0.5px solid var(--ol-border)",
-                                    background: "var(--ol-bg)",
-                                    boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+                                    border: "0.5px solid var(--kw-border)",
+                                    background: "var(--kw-bg)",
+                                    boxShadow: "var(--kw-shadow-dropdown)",
                                     maxHeight: 240,
                                     overflowY: "auto",
                                 }}
@@ -314,7 +315,7 @@ function SendInvitationModal({
                                 {!isFetching && searchResults.length === 0 && (
                                     <div
                                         className="px-3 py-3 text-[12.5px] text-center"
-                                        style={{ color: "var(--ol-muted)" }}
+                                        style={{ color: "var(--kw-muted)" }}
                                     >
                                         Không tìm thấy người dùng nào.
                                     </div>
@@ -329,17 +330,18 @@ function SendInvitationModal({
                                         className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors"
                                         style={{ background: "transparent" }}
                                         onMouseEnter={(e) => {
-                                            (e.currentTarget as HTMLElement).style.background = "var(--ol-bg3)";
+                                            (e.currentTarget as HTMLElement).style.background = "var(--kw-bg3)";
                                         }}
                                         onMouseLeave={(e) => {
                                             (e.currentTarget as HTMLElement).style.background = "transparent";
                                         }}
                                     >
                                         {/* Avatar */}
+                                        // ── Avatar nhỏ trong dropdown search results ─────────────────────
                                         <div
                                             style={{
                                                 width: 28, height: 28, borderRadius: "50%",
-                                                background: "#E6F1FB", color: "#0C447C",
+                                                background: "var(--kw-avatar-bg)", color: "var(--kw-avatar-color)",
                                                 display: "flex", alignItems: "center",
                                                 justifyContent: "center", fontSize: 11,
                                                 fontWeight: 500, flexShrink: 0, overflow: "hidden",
@@ -356,7 +358,7 @@ function SendInvitationModal({
                                             <p className="text-[13px] font-medium m-0 truncate">
                                                 {user.username}
                                             </p>
-                                            <p className="text-[11.5px] m-0 truncate" style={{ color: "var(--ol-muted)" }}>
+                                            <p className="text-[11.5px] m-0 truncate" style={{ color: "var(--kw-muted)" }}>
                                                 {user.name} · {user.email}
                                             </p>
                                         </div>
@@ -367,7 +369,7 @@ function SendInvitationModal({
                     </div>
 
                     {/* Hint */}
-                    <p className="text-[11.5px] mt-1.5 m-0" style={{ color: "var(--ol-muted)" }}>
+                    <p className="text-[11.5px] mt-1.5 m-0" style={{ color: "var(--kw-muted)" }}>
                         {selected
                             ? `✓ Đã chọn: ${selected.name} (${selected.username})`
                             : "Nhập username hoặc email để tìm kiếm."
@@ -377,7 +379,7 @@ function SendInvitationModal({
 
                 {/* Role selection — giữ nguyên như cũ */}
                 <div>
-                    <label className="block text-[12px] mb-2" style={{ color: "var(--ol-muted)" }}>
+                    <label className="block text-[12px] mb-2" style={{ color: "var(--kw-muted)" }}>
                         Phân quyền
                     </label>
                     <div className="flex flex-col gap-2">
@@ -386,8 +388,8 @@ function SendInvitationModal({
                                 key={r}
                                 className="flex items-start gap-3 px-3 py-2.5 rounded-md cursor-pointer"
                                 style={{
-                                    border: `0.5px solid ${role === r ? "var(--ol-border2)" : "var(--ol-border)"}`,
-                                    background: role === r ? "var(--ol-bg3)" : "transparent",
+                                    border: `0.5px solid ${role === r ? "var(--kw-border2)" : "var(--kw-border)"}`,
+                                    background: role === r ? "var(--kw-bg3)" : "transparent",
                                 }}
                             >
                                 <input
@@ -400,7 +402,7 @@ function SendInvitationModal({
                                 />
                                 <div>
                                     <p className="text-[13px] font-medium m-0">{ROLE_LABEL[r]}</p>
-                                    <p className="text-[11.5px] m-0 mt-0.5" style={{ color: "var(--ol-muted)" }}>
+                                    <p className="text-[11.5px] m-0 mt-0.5" style={{ color: "var(--kw-muted)" }}>
                                         {r === "ADMIN"
                                             ? "Quản lý secrets, settings và members"
                                             : "Xem secrets, chỉnh settings"}
@@ -479,16 +481,16 @@ export function ClientMembers({ id, canManageMembers }: ClientMembersProps) {
                     {/* Column header */}
                     <div
                         className="flex items-center gap-3 pb-2 mb-1"
-                        style={{ borderBottom: "0.5px solid var(--ol-border)" }}
+                        style={{ borderBottom: "0.5px solid var(--kw-border)" }}
                     >
                         <div className="w-[34px] shrink-0" />
-                        <p className="flex-1 text-[11px] font-medium m-0" style={{ color: "var(--ol-muted)" }}>
+                        <p className="flex-1 text-[11px] font-medium m-0" style={{ color: "var(--kw-muted)" }}>
                             Thành viên
                         </p>
-                        <p className="text-[11px] font-medium m-0 hidden sm:block shrink-0" style={{ color: "var(--ol-muted)" }}>
+                        <p className="text-[11px] font-medium m-0 hidden sm:block shrink-0" style={{ color: "var(--kw-muted)" }}>
                             Tham gia
                         </p>
-                        <p className="text-[11px] font-medium m-0 shrink-0 w-[110px] text-right" style={{ color: "var(--ol-muted)" }}>
+                        <p className="text-[11px] font-medium m-0 shrink-0 w-[110px] text-right" style={{ color: "var(--kw-muted)" }}>
                             Quyền
                         </p>
                         {canManageMembers && <div className="w-[52px] shrink-0" />}
@@ -508,7 +510,7 @@ export function ClientMembers({ id, canManageMembers }: ClientMembersProps) {
                     </div>
 
                     {members.length === 0 && (
-                        <p className="text-[12.5px] py-4 text-center m-0" style={{ color: "var(--ol-muted)" }}>
+                        <p className="text-[12.5px] py-4 text-center m-0" style={{ color: "var(--kw-muted)" }}>
                             Chưa có thành viên nào.
                         </p>
                     )}
@@ -518,7 +520,7 @@ export function ClientMembers({ id, canManageMembers }: ClientMembersProps) {
                         <>
                             <p
                                 className="text-[11.5px] font-medium mt-4 mb-1"
-                                style={{ color: "var(--ol-muted)" }}
+                                style={{ color: "var(--kw-muted)" }}
                             >
                                 Đang chờ xác nhận ({pendingInvitations.length})
                             </p>

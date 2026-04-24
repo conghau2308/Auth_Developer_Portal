@@ -24,7 +24,6 @@ export function AvatarCard() {
             />
             <CardBody>
                 <div className="flex items-center gap-5">
-                    {/* Avatar preview with hover overlay */}
                     <div
                         className="relative w-[72px] h-[72px] rounded-full flex items-center justify-center shrink-0 overflow-hidden cursor-pointer group"
                         style={{
@@ -33,7 +32,7 @@ export function AvatarCard() {
                             fontFamily: "'Syne', sans-serif",
                             fontWeight: 800,
                             fontSize: 24,
-                            color: "#fff",
+                            color: "var(--kw-text-on-brand)",
                         }}
                         onClick={() => toast("Chức năng upload ảnh")}
                     >
@@ -44,9 +43,10 @@ export function AvatarCard() {
                             </AvatarFallback>
                         </Avatar>
                         <div
-                            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[10px] uppercase tracking-[0.05em] text-white"
+                            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[10px] uppercase tracking-[0.05em]"
                             style={{
-                                background: "rgba(0,0,0,0.6)",
+                                background: "var(--kw-overlay-soft)",
+                                color: "var(--kw-text-on-brand)",
                                 fontFamily: "'IBM Plex Mono', monospace",
                             }}
                         >
@@ -54,9 +54,8 @@ export function AvatarCard() {
                         </div>
                     </div>
 
-                    {/* Info + actions */}
                     <div>
-                        <p className="text-[13px] font-medium mb-1.5" style={{ color: "#e8e8ed" }}>
+                        <p className="text-[13px] font-medium mb-1.5" style={{ color: "var(--kw-text-strong)" }}>
                             {user?.name || "Unknown User"}
                         </p>
                         <p className="text-[12px] mb-3" style={{ color: "var(--ol-muted)" }}>

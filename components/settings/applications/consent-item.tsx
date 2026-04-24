@@ -4,8 +4,6 @@ import { useState } from "react";
 import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import { Modal, ModalActions, ModalBody } from "../ui/modal";
-import { toast } from "sonner";
-import { ConsentedApp } from "@/types/common.types";
 import { AuthorizedApplication } from "@/types/api.types";
 import { useRevokeApplication } from "@/hooks/use-user";
 
@@ -33,7 +31,6 @@ export function ConsentItem({ app }: { app: AuthorizedApplication }) {
                     ((e.currentTarget as HTMLElement).style.background = "transparent")
                 }
             >
-                {/* App icon */}
                 <div
                     className="w-10 h-10 rounded-[10px] shrink-0 flex items-center justify-center text-[18px]"
                     style={{
@@ -44,9 +41,8 @@ export function ConsentItem({ app }: { app: AuthorizedApplication }) {
                     {app.clientIcon}
                 </div>
 
-                {/* App info */}
                 <div className="flex-1 min-w-0">
-                    <div className="text-[13.5px] font-semibold" style={{ color: "#e8e8ed" }}>
+                    <div className="text-[13.5px] font-semibold" style={{ color: "var(--kw-text-strong)" }}>
                         {app.clientName}
                     </div>
                     <div className="flex gap-[5px] flex-wrap mt-[5px]">
@@ -61,28 +57,22 @@ export function ConsentItem({ app }: { app: AuthorizedApplication }) {
                     </div>
                 </div>
 
-                {/* Revoke button */}
                 <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
                     Revoke
                 </Button>
             </div>
 
-            {/* Revoke confirm modal */}
             <Modal open={open} onClose={() => setOpen(false)} title="Revoke quyền truy cập?">
                 <ModalBody>
                     Ứng dụng{" "}
-                    <strong style={{ color: "#e8e8ed" }}>{app.clientIcon}</strong> sẽ không thể truy
+                    <strong style={{ color: "var(--kw-text-strong)" }}>{app.clientIcon}</strong> sẽ không thể truy
                     cập tài khoản của bạn. Refresh token hiện tại sẽ bị vô hiệu hóa ngay lập tức.
                 </ModalBody>
                 <ModalActions>
                     <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
                         Hủy
                     </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleRevoke}
-                    >
+                    <Button variant="outline" size="sm" onClick={handleRevoke}>
                         Xác nhận revoke
                     </Button>
                 </ModalActions>

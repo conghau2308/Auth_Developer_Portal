@@ -13,7 +13,7 @@ export function PageHead({ title, description, action }: PageHeadProps) {
             <div>
                 <h1
                     className="text-[22px] font-bold tracking-[-0.4px]"
-                    style={{ fontFamily: "'Syne', sans-serif", color: "#e8e8ed" }}
+                    style={{ fontFamily: "'Syne', sans-serif", color: "var(--kw-text-strong)" }}
                 >
                     {title}
                 </h1>

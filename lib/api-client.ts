@@ -42,27 +42,20 @@ _apiClient.interceptors.response.use(
         await _apiClient.post('/auth/refresh');
         return _apiClient(originalRequest);
       } catch (refreshError) {
+        // ✅ Chỉ set null, KHÔNG removeQueries, KHÔNG redirect ở đây
+        // Để useLogout / useAuth tự xử lý state
         queryClient.setQueryData(['auth', 'me'], null);
-        queryClient.removeQueries({ queryKey: ['auth'] });
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
         return Promise.reject(refreshError);
       }
     }
 
     if (error.response?.status === 403) {
       queryClient.setQueryData(['auth', 'me'], null);
-      // ✅ Không removeQueries — chỉ set null là đủ
-      // removeQueries gây re-fetch vô hạn
     }
 
-    if (isSkipUrl) {
-      queryClient.setQueryData(['auth', 'me'], null);
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-    }
+    // ✅ BỎ HOÀN TOÀN block isSkipUrl redirect ở interceptor
+    // Logout URL skip refresh là đúng, nhưng KHÔNG nên redirect ở đây
+    // Việc redirect thuộc về useLogout
 
     return Promise.reject(error);
   }

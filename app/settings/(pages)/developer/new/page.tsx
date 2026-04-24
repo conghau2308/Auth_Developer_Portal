@@ -4,7 +4,7 @@ import { PageHead } from "@/components/settings/ui/page-head";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "New OAuth App — Obsidian Lens IdP",
+    title: "New OAuth App - WiFaKey",
 };
 
 export default function NewAppPage() {

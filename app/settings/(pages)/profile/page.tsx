@@ -4,7 +4,8 @@ import { PageHead } from "@/components/settings/ui/page-head";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Profile — Obsidian Lens IdP",
+    title: "Profile - WiFaKey",
+    description: "Quản lý thông tin người dùng."
 };
 
 export default function ProfilePage() {

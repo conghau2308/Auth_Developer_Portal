@@ -22,7 +22,7 @@ function Avatar({ user, size = 22 }: { user: SecretUserDto; size?: number }) {
         <div
             style={{
                 width: size, height: size, borderRadius: "50%",
-                background: "#E6F1FB", color: "#0C447C",
+                background: "var(--kw-avatar-bg)", color: "var(--kw-avatar-color)",
                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                 fontSize: size * 0.45, fontWeight: 500, flexShrink: 0,
             }}
@@ -47,7 +47,7 @@ function UserChip({ user, danger }: { user: SecretUserDto; danger?: boolean }) {
             onMouseLeave={() => setShow(false)}
         >
             <Avatar user={user} size={18} />
-            <span className="text-[12px]" style={{ color: danger ? "var(--ol-danger)" : "inherit" }}>
+            <span className="text-[12px]" style={{ color: danger ? "var(--kw-danger)" : "inherit" }}>
                 {user.name}
             </span>
 
@@ -55,16 +55,16 @@ function UserChip({ user, danger }: { user: SecretUserDto; danger?: boolean }) {
                 <div
                     className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 rounded-lg p-2.5 min-w-[160px]"
                     style={{
-                        background: "var(--ol-bg2)",
-                        border: "0.5px solid var(--ol-border)",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                        background: "var(--kw-bg2)",
+                        border: "0.5px solid var(--kw-border)",
+                        boxShadow: "var(--kw-shadow-tooltip)",
                     }}
                 >
                     <div className="flex items-center gap-2">
                         <Avatar user={user} size={32} />
                         <div>
                             <p className="text-[13px] font-medium m-0">{user.name}</p>
-                            <p className="text-[11px] m-0" style={{ color: "var(--ol-muted)" }}>{shortId}</p>
+                            <p className="text-[11px] m-0" style={{ color: "var(--kw-muted)" }}>{shortId}</p>
                         </div>
                     </div>
                 </div>
@@ -99,7 +99,7 @@ function SecretRow({
         <div
             className="flex items-start gap-3 py-3"
             style={{
-                borderBottom: "0.5px solid var(--ol-border)",
+                borderBottom: "0.5px solid var(--kw-border)",
                 opacity: secret.active ? 1 : 0.6,
             }}
         >
@@ -110,8 +110,8 @@ function SecretRow({
                         className="text-[12.5px] px-2 py-1 rounded-md"
                         style={{
                             fontFamily: "'IBM Plex Mono', monospace",
-                            background: "var(--ol-bg3)",
-                            border: "0.5px solid var(--ol-border)",
+                            background: "var(--kw-bg3)",
+                            border: "0.5px solid var(--kw-border)",
                             textDecoration: secret.active ? "none" : "line-through",
                         }}
                     >
@@ -130,7 +130,7 @@ function SecretRow({
 
                 {/* Created by */}
                 <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
-                    <span className="text-[11.5px]" style={{ color: "var(--ol-muted)" }}>
+                    <span className="text-[11.5px]" style={{ color: "var(--kw-muted)" }}>
                         Tạo lúc {formatDate(secret.createdAt)} bởi
                     </span>
                     <UserChip user={secret.createdByUser} />
@@ -149,7 +149,7 @@ function SecretRow({
 
             {/* Actions */}
             <div className="flex items-center gap-2 shrink-0">
-                {secret.active && canManageSecrets && (
+                {/* {secret.active && canManageSecrets && (
                     <Button
                         variant="outline"
                         size="sm"
@@ -158,7 +158,7 @@ function SecretRow({
                     >
                         Revoke
                     </Button>
-                )}
+                )} */}
                 {canManageSecrets && (
                     <Button
                         variant="outline"
@@ -233,7 +233,7 @@ export function ClientCredentials({ id, clientId, canManageSecrets, secrets }: C
                 />
                 <CardBody>
                     {/* Client ID */}
-                    <label className="block text-[12px] mb-1.5" style={{ color: "var(--ol-muted)" }}>
+                    <label className="block text-[12px] mb-1.5" style={{ color: "var(--kw-muted)" }}>
                         Client ID
                     </label>
                     <div className="flex items-center gap-2 mb-4">
@@ -241,8 +241,8 @@ export function ClientCredentials({ id, clientId, canManageSecrets, secrets }: C
                             className="flex-1 rounded-[7px] px-3 py-2 text-[12.5px]"
                             style={{
                                 fontFamily: "'IBM Plex Mono', monospace",
-                                background: "var(--ol-bg3)",
-                                border: "1px solid var(--ol-border)",
+                                background: "var(--kw-bg3)",
+                                border: "1px solid var(--kw-border)",
                             }}
                         >
                             {clientId}
@@ -252,13 +252,13 @@ export function ClientCredentials({ id, clientId, canManageSecrets, secrets }: C
                         </Button>
                     </div>
 
-                    <hr style={{ border: "none", borderTop: "1px solid var(--ol-border)", margin: "16px 0" }} />
+                    <hr style={{ border: "none", borderTop: "1px solid var(--kw-border)", margin: "16px 0" }} />
 
                     {/* Secrets header */}
                     <div className="flex items-center justify-between mb-3">
                         <div>
                             <p className="text-[12.5px] font-medium m-0">Client Secrets</p>
-                            <p className="text-[11.5px] mt-0.5 m-0" style={{ color: "var(--ol-muted)" }}>
+                            <p className="text-[11.5px] mt-0.5 m-0" style={{ color: "var(--kw-muted)" }}>
                                 Secret chỉ hiển thị một lần khi được tạo.
                             </p>
                         </div>
@@ -286,7 +286,7 @@ export function ClientCredentials({ id, clientId, canManageSecrets, secrets }: C
                             />
                         ))}
                         {secrets.length === 0 && (
-                            <p className="text-[12.5px] py-4 text-center" style={{ color: "var(--ol-muted)" }}>
+                            <p className="text-[12.5px] py-4 text-center" style={{ color: "var(--kw-muted)" }}>
                                 Chưa có secret nào.
                             </p>
                         )}

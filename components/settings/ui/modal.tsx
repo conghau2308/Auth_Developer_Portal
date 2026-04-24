@@ -10,12 +10,9 @@ interface ModalProps {
 }
 
 export function Modal({ open, onClose, title, children }: ModalProps) {
-    // Close on Escape key
     useEffect(() => {
         if (!open) return;
-        const handler = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose();
-        };
+        const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
         window.addEventListener("keydown", handler);
         return () => window.removeEventListener("keydown", handler);
     }, [open, onClose]);
@@ -23,24 +20,26 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
     if (!open) return null;
 
     return (
-        <div
-            className="fixed inset-0 z-[200] flex items-center justify-center"
-            style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}
-            onClick={(e) => {
-                if (e.target === e.currentTarget) onClose();
-            }}
-        >
+        <div className="fixed inset-0 z-[200] flex items-center justify-center">
+            {/* Overlay */}
             <div
-                className="w-full max-w-[460px] rounded-xl p-7 animate-modal-in"
+                className="absolute inset-0"
                 style={{
-                    background: "var(--ol-bg2)",
-                    border: "1px solid var(--ol-border2)",
+                    background: "rgba(0,0,0,0.4)", // hoặc var(--kw-overlay)
+                    backdropFilter: "blur(4px)"
+                }}
+                onClick={onClose}
+            />
+
+            {/* Modal content */}
+            <div
+                className="relative w-full max-w-[460px] rounded-xl p-7 animate-modal-in"
+                style={{
+                    background: "var(--kw-bg)",
+                    border: "1px solid var(--ol-border)",
                 }}
             >
-                <h3
-                    className="text-[17px] font-bold mb-1.5"
-                    style={{ fontFamily: "'Syne', sans-serif" }}
-                >
+                <h3 className="text-[17px] font-bold mb-1.5">
                     {title}
                 </h3>
                 {children}
@@ -64,27 +63,17 @@ export function ModalActions({ children }: { children: React.ReactNode }) {
     return <div className="flex gap-2.5 justify-end">{children}</div>;
 }
 
-// ── Warn box ────────────────────────────────────────────────────
 export function WarnBox({ children }: { children: React.ReactNode }) {
     return (
         <div
             className="flex gap-2 items-start rounded-lg px-3.5 py-3 text-[12.5px] mb-4"
             style={{
-                background: "rgba(245,158,11,0.08)",
-                border: "1px solid rgba(245,158,11,0.25)",
+                background: "var(--kw-warn-soft)",
+                border: "1px solid var(--kw-warn-border)",
                 color: "var(--ol-warn)",
             }}
         >
-            {/* Warning icon */}
-            <svg
-                width="14"
-                height="14"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                className="shrink-0 mt-[1px]"
-            >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="shrink-0 mt-[1px]">
                 <path d="M8 1L1 14h14L8 1z" />
                 <path d="M8 6v4M8 11.5v.5" />
             </svg>
@@ -93,7 +82,6 @@ export function WarnBox({ children }: { children: React.ReactNode }) {
     );
 }
 
-// ── Secret reveal box ────────────────────────────────────────────
 export function SecretBox({ value }: { value: string }) {
     return (
         <div
@@ -101,7 +89,7 @@ export function SecretBox({ value }: { value: string }) {
             style={{
                 fontFamily: "'IBM Plex Mono', monospace",
                 background: "var(--ol-bg3)",
-                border: "1px solid rgba(61,220,132,0.3)",
+                border: "1px solid var(--kw-success-border)",
                 color: "var(--ol-success)",
             }}
         >

@@ -57,7 +57,6 @@ export function Sidebar() {
     const pathname = usePathname();
 
     const isActive = (href: string) => {
-        // Developer sub-pages all highlight the developer nav item
         if (href === "/settings/developer") {
             return pathname.startsWith("/settings/developer");
         }
@@ -68,7 +67,6 @@ export function Sidebar() {
         <aside className="w-[220px] shrink-0">
             {SIDEBAR_SECTIONS.map((section) => (
                 <div key={section.title} className="mb-6">
-                    {/* Section label */}
                     <span
                         className="block px-3 pb-2 text-[10px] uppercase tracking-[0.12em] font-medium"
                         style={{
@@ -79,7 +77,6 @@ export function Sidebar() {
                         {section.title}
                     </span>
 
-                    {/* Items */}
                     {section.items.map((item) => {
                         const active = isActive(item.href);
                         return (
@@ -93,12 +90,11 @@ export function Sidebar() {
                                         : "font-normal hover:bg-[var(--ol-bg3)]"
                                 )}
                                 style={{
-                                    color: active ? "#e8e8ed" : "var(--ol-muted)",
+                                    color: active ? "var(--kw-text-strong)" : "var(--ol-muted)",
                                     background: active ? "var(--ol-bg4)" : "transparent",
                                     borderColor: active ? "var(--ol-border)" : "transparent",
                                 }}
                             >
-                                {/* Dot indicator */}
                                 <span
                                     className="w-[5px] h-[5px] rounded-full shrink-0 transition-colors"
                                     style={{ background: active ? "var(--ol-accent)" : "var(--ol-muted2)" }}
