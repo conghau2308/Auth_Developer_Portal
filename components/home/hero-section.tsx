@@ -1,146 +1,77 @@
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
-
-function FaceScanOrb() {
-    const corners = [
-        "top-[40px] left-[40px] border-t-[1.5px] border-l-[1.5px]",
-        "top-[40px] right-[40px] border-t-[1.5px] border-r-[1.5px]",
-        "bottom-[40px] left-[40px] border-b-[1.5px] border-l-[1.5px]",
-        "bottom-[40px] right-[40px] border-b-[1.5px] border-r-[1.5px]",
-    ];
-
-    return (
-        <div className="flex flex-col items-center gap-3">
-            <div className="relative w-[220px] h-[220px]">
-                {/* Rings */}
-                <div className="absolute inset-0 rounded-full border border-primary/18" />
-                <div className="absolute inset-4 rounded-full border border-primary/18" />
-                <div className="absolute inset-[28px] rounded-full border border-dashed border-primary/22 animate-[spin_14s_linear_infinite]" />
-                <div className="absolute inset-[10px] rounded-full border border-dashed border-violet-400/18 animate-[spin_9s_linear_infinite_reverse] opacity-60" />
-
-                {/* Corner brackets */}
-                {corners.map((cls, i) => (
-                    <div key={i} className={`absolute w-3.5 h-3.5 border-primary/55 ${cls}`} />
-                ))}
-
-                {/* Core */}
-                <div className="absolute inset-[52px] rounded-full border border-primary/28 bg-gradient-to-br from-primary/13 to-primary/6 overflow-hidden">
-                    {/* Scan line */}
-                    <div className="absolute left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-primary to-violet-400 animate-[scanFace_2.6s_ease-in-out_infinite]" />
-
-                    {/* Face SVG */}
-                    <svg
-                        viewBox="0 0 80 80"
-                        fill="none"
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[68px] h-[68px]"
-                    >
-                        <ellipse cx="40" cy="30" rx="13" ry="14" stroke="rgba(99,102,241,0.65)" strokeWidth="1.2" />
-                        <path d="M27 52c3-6 23-6 26 0" stroke="rgba(99,102,241,0.5)" strokeWidth="1.2" strokeLinecap="round" />
-                        <circle cx="35" cy="29" r="2.2" fill="rgba(99,102,241,0.85)" />
-                        <circle cx="45" cy="29" r="2.2" fill="rgba(99,102,241,0.85)" />
-                        <path d="M37 35c1.2.9 3.8.9 6 0" stroke="rgba(99,102,241,0.5)" strokeWidth="1.2" strokeLinecap="round" />
-                        {/* Side measurement lines */}
-                        <line x1="22" y1="30" x2="27" y2="30" stroke="rgba(99,102,241,0.35)" strokeWidth="1" />
-                        <line x1="53" y1="30" x2="58" y2="30" stroke="rgba(99,102,241,0.35)" strokeWidth="1" />
-                        <line x1="30" y1="18" x2="33" y2="21" stroke="rgba(99,102,241,0.25)" strokeWidth="1" />
-                        <line x1="50" y1="18" x2="47" y2="21" stroke="rgba(99,102,241,0.25)" strokeWidth="1" />
-                    </svg>
-                </div>
-            </div>
-
-            {/* Status dots */}
-            <div className="flex gap-1.5">
-                {[0, 300, 600].map((delay) => (
-                    <div
-                        key={delay}
-                        className="w-1.5 h-1.5 rounded-full bg-primary animate-[dotPulse_1.8s_ease-in-out_infinite]"
-                        style={{ animationDelay: `${delay}ms` }}
-                    />
-                ))}
-            </div>
-            <p className="text-[11px] tracking-widest uppercase text-muted-foreground">Scanning</p>
-        </div>
-    );
-}
+"use client";
 
 export function HeroSection() {
     return (
-        <section className="relative flex flex-col items-center text-center pt-36 pb-28 px-6 overflow-hidden">
+        <section className="max-w-screen-xl mx-auto px-6 md:px-8 py-16 md:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
 
-            {/* Background grid — Đã đổi từ cyan-soft sang brand-soft */}
-            <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                    backgroundImage: [
-                        "linear-gradient(var(--kw-brand-soft) 1px, transparent 1px)",
-                        "linear-gradient(90deg, var(--kw-brand-soft) 1px, transparent 1px)",
-                    ].join(", "),
-                    backgroundSize: "40px 40px",
-                }}
-            />
-
-            {/* Glow blob - Tăng độ tương phản một chút để nổi bật nền màu Indigo */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[680px] h-[480px] rounded-full bg-primary/15 dark:bg-primary/10 blur-[120px] pointer-events-none" />
-
-            {/* Content */}
-            <div className="relative z-10 flex flex-col items-center">
-
-                {/* Status badge */}
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-8 rounded-full border border-primary/25 bg-primary/10 text-[12px] font-bold text-primary tracking-[0.04em] shadow-sm">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_var(--kw-brand)]" />
-                    Face-native OAuth · Now in GA
+            {/* ── Left: Copy ── */}
+            <div className="space-y-6">
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-[11px] font-bold tracking-[0.1em] uppercase border border-primary/20">
+                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    Now available in General Availability
                 </div>
 
-                {/* Headline — Dùng text-strong và Gradient Text */}
-                <h1 className="text-5xl md:text-[68px] font-black leading-[1.06] tracking-[-0.03em] text-strong mb-6">
-                    Identity that<br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--kw-text-strong)] via-[var(--kw-brand)] to-[var(--kw-brand-light)] drop-shadow-sm">sees you.</span>
+                {/* Heading */}
+                <h1 className="text-[40px] md:text-[52px] font-black tracking-[-0.02em] leading-[1.2] text-strong">
+                    The Future of Auth is You.
                 </h1>
 
-                {/* Sub-headline — Dùng text-body để sắc nét hơn ở Light Mode */}
-                <p className="text-base md:text-lg text-body dark:text-muted-foreground max-w-[440px] leading-relaxed font-medium mb-10">
-                    Drop-in biometric OAuth for your app — no passwords, no friction.
-                    One face scan replaces every credential.
+                {/* Body */}
+                <p className="text-[18px] text-body dark:text-muted-foreground leading-relaxed font-medium max-w-lg">
+                    Eliminate passwords forever. Deploy military-grade biometric authentication to your app
+                    in minutes with our drop-in SDK. Secure, seamless, and lightning fast.
                 </p>
 
-                {/* CTAs */}
-                <div className="flex flex-wrap items-center justify-center gap-4 mb-16">
-                    <Link href="/sign-up">
-                        {/* Đã đổi btn-cyan-gradient sang btn-brand-gradient */}
-                        <button className="btn-brand-gradient inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-[15px] active:scale-95 transition-all">
-                            Start for free
-                            <ArrowRight size={16} />
-                        </button>
-                    </Link>
-                    <Link href="/docs">
-                        {/* Cập nhật style nút Docs trông "SaaS" hơn */}
-                        <button className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-[15px] font-bold text-strong bg-white dark:bg-card border border-slate-200 dark:border-border shadow-sm hover:border-primary/40 hover:bg-slate-50 dark:hover:bg-muted/50 transition-all active:scale-95">
-                            View docs
-                            <ArrowRight size={15} className="opacity-60" />
-                        </button>
-                    </Link>
+                {/* CTA buttons */}
+                <div className="flex flex-wrap gap-4 pt-4">
+                    <button className="btn-brand-gradient text-white px-8 py-3 rounded-lg font-bold text-[14px] tracking-wide transition-all duration-200 active:scale-95">
+                        Try Demo
+                    </button>
+                    <button className="bg-transparent border-2 border-primary text-primary px-8 py-3 rounded-lg font-bold text-[14px] hover:bg-primary/5 transition-all duration-200 active:scale-95">
+                        Read Docs
+                    </button>
                 </div>
+            </div>
 
-                {/* Animated face scan */}
-                <FaceScanOrb />
+            {/* ── Right: Glass visual card ── */}
+            <div className="relative flex justify-center items-center">
+                {/* Decorative blobs */}
+                <div
+                    className="absolute inset-0 bg-primary/10 rounded-full blur-3xl animate-pulse"
+                    style={{ animationDuration: "4s" }}
+                />
+                <div className="absolute w-64 h-64 bg-[var(--kw-brand-soft)] rounded-full blur-2xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
 
-                {/* Scan status */}
-                <p className="mt-5 text-[12px] font-bold text-primary tracking-[0.1em] uppercase drop-shadow-sm">
-                    Biometric verified · 312ms
-                </p>
+                {/* Glass panel */}
+                <div className="relative z-10 glass-panel p-4 rounded-2xl w-full max-w-md aspect-square flex items-center justify-center border-t border-white/80 shadow-2xl overflow-hidden">
 
-                {/* Trust row — Đậm nét và rõ ràng hơn */}
-                <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mt-10 text-[13px] text-body dark:text-muted-foreground/80 font-bold">
-                    {["SOC 2 Type II", "GDPR compliant", "Zero biometric storage", "99.97% uptime SLA"].map((item, i, arr) => (
-                        <div key={item} className="flex items-center gap-5">
-                            <span>{item}</span>
-                            {i < arr.length - 1 && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-border inline-block" />
-                            )}
-                        </div>
-                    ))}
+                    {/* Hero image */}
+                    <div className="w-full h-full rounded-xl overflow-hidden relative">
+                        <img
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvqiafYBD7t9FpiH3nX_A8ROpwqxoH01Gp-C1sNyJjD2qoU_SbdEFaaWawRYyTAms5wHrZTay1wXUW4g-UCbt0Gm-VQC9i-vYLSLMU02Rtk8geqp_O_S5gvJwTR_1uXG_0GGIe0VOHYxr4lBO-NvlAgjEJOywHV649aRWKwdeDjwu6G6NiwUQP2gMZNlY92lLDX25r7HQ_oQtrNrqH3LWSGcaGWa4jnTc3wwQyT3NvGXi3RR7Eo7RSWCvFbLior8w-84es7P5LVgc"
+                            alt="Abstract representation of biometric scanning with glowing digital mesh over a face profile in deep indigo tones"
+                            className="w-full h-full object-cover opacity-90 mix-blend-luminosity"
+                        />
+
+                        {/* Scan line */}
+                        <div className="absolute left-0 right-0 h-0.5 bg-primary/80 shadow-[0_0_15px_rgba(79,70,229,0.8)] animate-[scanFace_2s_ease-in-out_infinite]" />
+                    </div>
+
+                    {/* Border overlay */}
+                    <div className="absolute inset-0 border-2 border-primary/20 rounded-2xl pointer-events-none" />
+
+                    {/* Match found floating badge */}
+                    <div className="absolute bottom-6 bg-white/90 dark:bg-card/90 backdrop-blur-md px-4 py-2 rounded-lg border border-[var(--kw-border)] flex items-center gap-3 shadow-lg">
+                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-primary fill-current shrink-0">
+                            <path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z" />
+                        </svg>
+                        <span className="text-[13px] font-bold text-strong">
+                            Match Found{" "}
+                            <span className="text-body dark:text-muted-foreground font-normal">0.4s</span>
+                        </span>
+                    </div>
                 </div>
-
             </div>
         </section>
     );

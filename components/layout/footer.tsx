@@ -17,7 +17,7 @@ export function Footer() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-[0_0_15px_var(--kw-brand-soft)] transition-all">
                 <Fingerprint size={18} className="text-primary" />
               </div>
-              <span className="text-xl font-black text-strong tracking-tight">Keywave</span>
+              <span className="text-xl font-black text-strong tracking-tight">WiFaKey</span>
             </Link>
             <p className="text-[14px] text-body dark:text-muted-foreground leading-relaxed max-w-xs mb-6 font-medium">
               Drop-in biometric OAuth for your app. One face scan replaces every credential.
@@ -66,7 +66,7 @@ export function Footer() {
         {/* Bottom Row - Copyright & Socials */}
         <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-slate-200 dark:border-border gap-4">
           <div className="text-[13px] font-medium text-body dark:text-muted-foreground">
-            © 2026 Keywave Inc. Encrypted End-to-End.
+            © 2026 WiFaKey Inc. Encrypted End-to-End.
           </div>
           <div className="flex items-center gap-6">
             <Link href="#" className="text-body dark:text-muted-foreground hover:text-primary transition-colors" aria-label="Twitter">
