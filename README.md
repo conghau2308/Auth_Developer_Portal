@@ -51,3 +51,34 @@ To get a local copy up and running, follow these steps.
    ```bash
    git clone [https://github.com/conghau2308/Auth_Developer_Portal.git](https://github.com/conghau2308/Auth_Developer_Portal.git)
    cd Auth_Developer_Portal
+
+2. Install dependencies:
+    ```bash
+    npm install
+    # or yarn install / pnpm install
+3. Configure Environment Variables:
+Create a .env.local file in the root directory and specify the backend API URL. Make sure your FastAPI backend (running locally or on Azure VM) is accessible.
+    ```bash
+    NEXT_PUBLIC_COMPILER_API_URL=http://localhost:8000/api
+    # Replace with your actual deployed Azure backend URL for production testing
+4. Start the development server:
+    ```bash
+    npm run dev
+    Open http://localhost:3000 with your browser to see the IDE.
+
+## 📂 Project Structure
+├── app/                  # Next.js App Router (Pages, Layouts, API routes)
+├── components/           # Reusable UI components (shadcn/ui, custom buttons, etc.)
+├── features/             # Feature-based modules (e.g., face-auth, oauth-flow)
+├── hooks/                # Custom React hooks & state management (TanStack Query mutations/queries)
+├── services/             # API integration layers (Axios endpoints, auth services)
+├── lib/                  # Utility functions, API client configuration, formatting
+├── public/               # Static assets, MediaPipe models (if hosted locally)
+└── types/                # TypeScript interface and type definitions (DTOs, Models)
+## 🌐 Deployment
+The frontend is fully optimized for Vercel. Push your code to the main branch to trigger an automatic deployment.
+
+**Note:** Ensure that your Vercel project settings include the correct NEXT_PUBLIC_COMPILER_API_URL pointing to your Dockerized FastAPI backend hosted on Azure.
+
+## 📄 License
+Distributed under the MIT License. See LICENSE for more information.
