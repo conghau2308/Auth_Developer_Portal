@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🛡️ WiFaKey Developer Portal & Authorization UI
 
-## Getting Started
+[![Next.js](https://img.shields.io/badge/Next.js-Black?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![MediaPipe](https://img.shields.io/badge/MediaPipe-00A67E?logo=google&logoColor=white)](https://developers.google.com/mediapipe)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed_on-Vercel-000000?logo=vercel&logoColor=white)](https://auth-developer-portal.vercel.app/)
 
-First, run the development server:
+WiFaKey Developer Portal is the frontend application for the WiFaKey Authentication ecosystem. It serves a dual purpose: providing a highly secure, passwordless facial biometric authentication interface for end-users, handling the core OAuth authorization flow, and offering a comprehensive management dashboard for developers to configure OAuth 2.1 / OIDC clients.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+🌍 **Live Demo:** [WiFaKey Developer Portal](https://auth-developer-portal.vercel.app/)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Key Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 🔄 OAuth 2.1 Authorization Flow Handling
+*   **Authorization Endpoint:** Acts as the primary interface for initiating the OAuth 2.1 / OIDC flow.
+*   **Parameter Parsing & Validation:** Securely captures and validates standard authorization request parameters including `client_id`, `redirect_uri`, `response_type`, `scope`, `state`, and PKCE parameters (`code_challenge`, `code_challenge_method`).
+*   **Seamless Redirection Pipeline:** Guides users through the biometric authentication and consent pipeline, safely redirecting back to the client application with the authorization `code` upon completion.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 👤 Passwordless Biometric Authentication
+*   **Client-side Face Processing:** Utilizes `MediaPipe FaceMesh` directly in the browser for fast, privacy-preserving biometric capture.
+*   **Advanced Liveness Detection:** Multi-layered anti-spoofing mechanism ensuring real-user presence:
+    *   *Challenge-Response:* Prompts for blinking and head turning.
+    *   *Passive Analysis:* Evaluates micro-movements and depth variance.
+    *   *Quality Control:* Real-time image quality checks and a recasting/recentering phase before final capture.
 
-## Learn More
+### ⚙️ Developer Management & Dashboard
+*   **OAuth Client Management:** Intuitive dashboard for developers to register and manage OAuth clients, configure redirect URIs, and handle credentials.
+*   **Consent Management:** User-facing consent screens for scope authorization, featuring an auto-skip mechanism for previously authorized clients.
+*   **Secure Session Handling:** Seamless token management using Axios interceptors and `TanStack Query` for automatic, background token refreshing without interrupting the user experience.
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+*   **Framework:** [Next.js](https://nextjs.org/) (App Router)
+*   **Language:** [TypeScript](https://www.typescriptlang.org/)
+*   **UI / Styling:** [Tailwind CSS](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
+*   **State & Data Fetching:** [TanStack Query](https://tanstack.com/query/latest) (React Query)
+*   **Computer Vision:** [MediaPipe FaceMesh](https://developers.google.com/mediapipe/solutions/vision/face_landmarker)
+*   **HTTP Client:** [Axios](https://axios-http.com/)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚀 Getting Started
 
-## Deploy on Vercel
+To get a local copy up and running, follow these steps.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Prerequisites
+*   Node.js 18.x or higher
+*   npm, yarn, pnpm, or bun installed
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone [https://github.com/your-username/wifakey-frontend.git](https://github.com/your-username/wifakey-frontend.git)
+   cd wifakey-frontend
