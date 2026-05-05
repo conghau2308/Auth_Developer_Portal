@@ -21,6 +21,7 @@ export function FaceStep({ onBack, onSuccess, savedBase64, onCapture }: FaceStep
             </header>
 
             <BiometricScanner
+                mode="signup"
                 initialImage={savedBase64}
                 onCapture={(base64) => {
                     onCapture?.(base64);

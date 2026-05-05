@@ -20,7 +20,7 @@ function StepBar({ current }: { current: "form" | "face" | "review" | "done" }) 
   const activeIdx = idx === -1 ? STEPS.length : idx;
 
   return (
-    <div className="flex items-center gap-0 mb-10">
+    <div className="flex items-center gap-0 mb-5">
       {STEPS.map((step, i) => {
         const done = i < activeIdx;
         const active = i === activeIdx;

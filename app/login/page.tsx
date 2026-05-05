@@ -40,7 +40,7 @@ export default function LoginPage() {
     setFaceBase64(null);
   }, []);
 
-  const handleRegister = () => {
+  const handleLogin = () => {
     if (!canProceed || !faceBase64 || !biometricDone) return;
 
     login.mutate({ username, imageBase64: faceBase64 }, {
@@ -91,7 +91,7 @@ export default function LoginPage() {
           </div>
 
           {/* Card */}
-          <div className="bg-card rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
+          <div className="bg-card rounded-[2rem] p-8 pt-0 shadow-2xl relative overflow-hidden">
             <div className="relative z-10 space-y-8">
               {/* ── STEP 1: USERNAME ── */}
               <div
@@ -190,6 +190,7 @@ export default function LoginPage() {
                     </div>
 
                     <BiometricScanner
+                      mode="login"
                       onSuccess={handleBiometricSuccess}
                       onReset={handleBiometricReset}
                       onCapture={(base64) => setFaceBase64(base64)}
@@ -197,7 +198,7 @@ export default function LoginPage() {
 
                     <Button
                       disabled={!biometricDone || !faceBase64 || !canProceed}
-                      onClick={handleRegister}
+                      onClick={handleLogin}
                       // hsl(var(--primary)/0.3) → kw-brand-glow token
                       className="w-full py-6 rounded-xl btn-brand-gradient font-bold text-base active:scale-95 transition-all border-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:scale-100"
                       style={{ boxShadow: "0 10px 30px var(--kw-brand-glow)" }}
