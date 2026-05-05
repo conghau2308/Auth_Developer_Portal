@@ -49,5 +49,5 @@ To get a local copy up and running, follow these steps.
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/your-username/wifakey-frontend.git](https://github.com/your-username/wifakey-frontend.git)
-   cd wifakey-frontend
+   git clone [https://github.com/conghau2308/Auth_Developer_Portal.git](https://github.com/conghau2308/Auth_Developer_Portal.git)
+   cd Auth_Developer_Portal
