@@ -67,14 +67,15 @@ Create a .env.local file in the root directory and specify the backend API URL. 
     Open http://localhost:3000 with your browser to see the IDE.
 
 ## 📂 Project Structure
-├── app/                  # Next.js App Router (Pages, Layouts, API routes)
-├── components/           # Reusable UI components (shadcn/ui, custom buttons, etc.)
-├── features/             # Feature-based modules (e.g., face-auth, oauth-flow)
-├── hooks/                # Custom React hooks & state management (TanStack Query mutations/queries)
-├── services/             # API integration layers (Axios endpoints, auth services)
-├── lib/                  # Utility functions, API client configuration, formatting
-├── public/               # Static assets, MediaPipe models (if hosted locally)
-└── types/                # TypeScript interface and type definitions (DTOs, Models)
+    ```plaintext
+    ├── app/                  # Next.js App Router (Pages, Layouts, API routes)
+    ├── components/           # Reusable UI components (shadcn/ui, custom buttons, etc.)
+    ├── features/             # Feature-based modules (e.g., face-auth, oauth-flow)
+    ├── hooks/                # Custom React hooks & state management (TanStack Query mutations/queries)
+    ├── services/             # API integration layers (Axios endpoints, auth services)
+    ├── lib/                  # Utility functions, API client configuration, formatting
+    ├── public/               # Static assets, MediaPipe models (if hosted locally)
+    └── types/                # TypeScript interface and type definitions (DTOs, Models)
 ## 🌐 Deployment
 The frontend is fully optimized for Vercel. Push your code to the main branch to trigger an automatic deployment.
 
