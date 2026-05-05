@@ -67,7 +67,6 @@ Create a .env.local file in the root directory and specify the backend API URL. 
     Open http://localhost:3000 with your browser to see the IDE.
 
 ## 📂 Project Structure
-    ```text
     ├── app/                  # Next.js App Router (Pages, Layouts, API routes)
     ├── components/           # Reusable UI components (shadcn/ui, custom buttons, etc.)
     ├── features/             # Feature-based modules (e.g., face-auth, oauth-flow)
