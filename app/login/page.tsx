@@ -17,6 +17,7 @@ import { BiometricScanner } from "@/components/layout/biometric-scanner";
 import { useLogin } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
+import { toast } from "sonner";
 
 type Step = "username" | "biometric";
 
@@ -50,7 +51,13 @@ export default function LoginPage() {
         setBiometricDone(false);
         // Để UI vẫn giữ tránh giật lag UI
         // setStep("username");
-        router.back();
+        toast.success("Đăng nhập thành công!");
+        router.push("/");
+      },
+      onError: (error: any) => {
+        toast.error(error.response?.data?.message || "Xác thực khuôn mặt thất bại. Vui lòng thử lại!");
+        setFaceBase64(null);
+        setBiometricDone(false);
       }
     });
   };
