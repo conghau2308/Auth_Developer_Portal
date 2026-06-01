@@ -7,6 +7,7 @@ import {
 import { Button } from "../ui/button";
 import { useFaceValidation } from "@/hooks/use-face-validation";
 import { ValidationOverlay } from "./validation-overlay";
+import { preloadWiFaKeyModels } from "@/lib/wifakey/model-loader";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -17,28 +18,27 @@ interface BiometricScannerProps {
     onSuccess: () => void;
     onReset?: () => void;
     onCapture?: (base64: string) => void;
+    onCaptureWithData?: (base64: string, imageData: ImageData, landmarks: { x: number; y: number }[]) => void;
     initialImage?: string | null;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function BiometricScanner({
-    mode, onSuccess, onReset, onCapture, initialImage,
+    mode, onSuccess, onReset, onCapture, onCaptureWithData, initialImage,
 }: BiometricScannerProps) {
     const [state, setState] = useState<ScanState>(initialImage ? "success" : "idle");
     const [capturedImage, setCapturedImage] = useState<string | null>(
         initialImage ? `data:image/jpeg;base64,${initialImage}` : null
     );
     const [errorMsg, setErrorMsg] = useState("");
-    const [progress, setProgress] = useState(0);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
-    const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // ── Face validation hook ─────────────────────────────────────────────────
-    const { state: validationState, startValidation, stopValidation, resetValidation } =
+    const { state: validationState, startValidation, stopValidation, resetValidation, latestLandmarksRef } =
         useFaceValidation({
             mode,
             onFail: (reason) => {
@@ -74,6 +74,8 @@ export function BiometricScanner({
 
     const startCamera = useCallback(async () => {
         setErrorMsg("");
+        // Preload ONNX models ngay khi camera mở — warm up trước khi user chụp
+        preloadWiFaKeyModels();
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 640 } },
@@ -101,33 +103,42 @@ export function BiometricScanner({
         canvas.height = video.videoHeight || 400;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
+        // Mirrored frame — dùng để hiển thị preview
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
         ctx.drawImage(video, 0, 0);
         const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+        const base64 = dataUrl.split(",")[1];
+
+        // Un-mirrored frame + landmarks — dùng cho WiFaKey (AdaFace cần ảnh tự nhiên)
+        if (onCaptureWithData) {
+            const offscreen = document.createElement("canvas");
+            offscreen.width = canvas.width;
+            offscreen.height = canvas.height;
+            const offCtx = offscreen.getContext("2d");
+            if (offCtx) {
+                offCtx.drawImage(video, 0, 0);
+                const imageData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height);
+                const landmarks = (latestLandmarksRef.current ?? []) as { x: number; y: number }[];
+                onCaptureWithData(base64, imageData, landmarks);
+            }
+        }
+
         setCapturedImage(dataUrl);
         stopCamera();
-        setProgress(0);
         setState("scanning");
-        onCapture?.(dataUrl.split(",")[1]);
-    }, [stopCamera, onCapture]);
+        onCapture?.(base64);
+    }, [stopCamera, onCapture, onCaptureWithData, latestLandmarksRef]);
 
-    // ── Scanning progress animation ──────────────────────────────────────────
+    // ── Scanning: CSS animation thay setInterval — không bị ONNX block ──────
     useEffect(() => {
         if (state !== "scanning") return;
-        setProgress(0);
-        let p = 0;
-        progressRef.current = setInterval(() => {
-            p += 100 / 28;
-            if (p >= 100) {
-                p = 100;
-                clearInterval(progressRef.current!);
-                setState("success");
-                onSuccess();
-            }
-            setProgress(Math.min(p, 100));
-        }, 100);
-        return () => clearInterval(progressRef.current!);
+        // onSuccess sau khi CSS animation kết thúc (2.5s)
+        const t = setTimeout(() => {
+            setState("success");
+            onSuccess();
+        }, 2500);
+        return () => clearTimeout(t);
     }, [state, onSuccess]);
 
     // ── Reset ────────────────────────────────────────────────────────────────
@@ -136,7 +147,6 @@ export function BiometricScanner({
         resetValidation();
         setCapturedImage(null);
         setErrorMsg("");
-        setProgress(0);
         setState("idle");
         onReset?.();
     };
@@ -336,13 +346,25 @@ export function BiometricScanner({
                 </div>
             </div>
 
-            {/* ── Progress bar ── */}
-            <div className="w-full rounded-full overflow-hidden"
-                style={{ height: 3, background: "hsl(var(--muted))", opacity: state === "scanning" ? 1 : 0, transition: "opacity 0.3s" }}>
-                <div className="h-full rounded-full"
-                    style={{ width: `${progress}%`, background: "hsl(var(--primary))", boxShadow: "0 0 8px hsl(var(--primary)/0.4)", transition: "width 0.1s linear" }}
-                />
-            </div>
+            {/* ── Progress bar — CSS animation, không bị ONNX block ── */}
+            {state === "scanning" && (
+                <div className="w-full rounded-full overflow-hidden"
+                    style={{ height: 3, background: "hsl(var(--muted))" }}>
+                    <div className="h-full rounded-full"
+                        style={{
+                            background: "hsl(var(--primary))",
+                            boxShadow: "0 0 8px hsl(var(--primary)/0.4)",
+                            animation: "scanProgress 2.5s linear forwards",
+                        }}
+                    />
+                </div>
+            )}
+            <style>{`
+                @keyframes scanProgress {
+                    from { width: 0% }
+                    to   { width: 100% }
+                }
+            `}</style>
 
             {/* ── Actions + Validation Overlay ── */}
             <div className="flex flex-col items-center gap-3 w-full" style={{ minHeight: 80 }}>
@@ -389,15 +411,8 @@ export function BiometricScanner({
                         <p className="text-sm font-semibold flex items-center gap-2"
                             style={{ color: "hsl(142 71% 38%)" }}>
                             <CheckCircle2 size={14} />
-                            Danh tính đã được xác minh
+                            Khuôn mặt thật
                         </p>
-                        {/* Hiện điểm tin cậy từ validation */}
-                        {validationState.score > 0 && (
-                            <span className="text-[11px] px-2.5 py-0.5 rounded-full"
-                                style={{ background: "hsl(142 71% 45%/0.1)", color: "hsl(142 71% 38%)" }}>
-                                Điểm tin cậy: {validationState.score}/100
-                            </span>
-                        )}
                         <Button onClick={reset}
                             className="flex items-center gap-1.5 rounded-lg text-xs font-semibold text-primary/90 hover:text-primary hover:bg-primary/10 transition-all active:scale-[0.97]"
                             style={{ padding: "8px 16px", border: "1px solid hsl(var(--primary)/0.4)", background: "transparent" }}>

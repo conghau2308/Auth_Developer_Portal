@@ -160,9 +160,7 @@ export function useFaceValidation(options: UseFaceValidationOptions = {}) {
         onFail,
     } = options;
 
-    const challenges: Challenge[] = mode === "login"
-        ? []
-        : (options.challenges ?? ["blink", "turn_left"]);
+    const challenges: Challenge[] = options.challenges ?? [];
 
     const [state, setState] = useState<ValidationState>({
         phase: "idle",
@@ -545,5 +543,5 @@ export function useFaceValidation(options: UseFaceValidationOptions = {}) {
 
     useEffect(() => () => stopValidation(), [stopValidation]);
 
-    return { state, startValidation, stopValidation, resetValidation };
+    return { state, startValidation, stopValidation, resetValidation, latestLandmarksRef: prevLandmarksRef };
 }

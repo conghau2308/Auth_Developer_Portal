@@ -20,13 +20,21 @@ export interface CreateUserDTO {
   username: string;
   name: string;
   email: string;
-  image_b64: string;
+  // WiFaKey client-side: chỉ gửi kết quả đã tính, không gửi ảnh hay embedding
+  helper_data_b64: string;
+  mask_b64: string;
+  key_hash_b64: string;
+}
+
+export interface DeltaResponseDto {
+  helper_data_b64: string;
+  mask_b64: string;
 }
 
 // ========== AUTH TYPES ==========
 export interface LoginDTO {
   username: string;
-  imageBase64: string;
+  hash_k_b64: string;
 }
 
 export interface LoginResponse {
@@ -104,6 +112,8 @@ export interface OAuthAuthorizeRequestDto {
   nonce: string;
   code_challenge: string;
   code_challenge_method: string;
+  // WiFaKey client-side: hash_k thay cho image
+  hash_k_b64: string;
 }
 
 export type OAuthAuthorizeResponseDto =

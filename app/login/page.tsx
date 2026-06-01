@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,9 +12,11 @@ import {
   Lock,
   ChevronRight,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
 import { BiometricScanner } from "@/components/layout/biometric-scanner";
 import { useLogin } from "@/hooks/use-auth";
+import { useWiFaKeyVerify } from "@/hooks/use-oauth";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
 import { toast } from "sonner";
@@ -25,12 +27,15 @@ export default function LoginPage() {
   const [step, setStep] = useState<Step>("username");
   const [username, setUsername] = useState("");
   const [biometricDone, setBiometricDone] = useState(false);
-  const [faceBase64, setFaceBase64] = useState<string | null>(null);
+  const [hashK, setHashK] = useState<string | null>(null);
 
   const canProceed = username.trim().length > 0;
 
   const login = useLogin();
   const router = useRouter();
+  const { computeHashK, processing: wifakeyProcessing, error: wifakeyError, clearError } = useWiFaKeyVerify();
+  // scannerKey: thay đổi giá trị → force remount BiometricScanner → reset về idle
+  const [scannerKey, setScannerKey] = useState(0);
 
   const handleBiometricSuccess = useCallback(() => {
     setBiometricDone(true);
@@ -38,38 +43,60 @@ export default function LoginPage() {
 
   const handleBiometricReset = useCallback(() => {
     setBiometricDone(false);
-    setFaceBase64(null);
-  }, []);
+    setHashK(null);
+    clearError();
+  }, [clearError]);
 
-  const handleLogin = () => {
-    if (!canProceed || !faceBase64 || !biometricDone) return;
+  const handleCaptureWithData = useCallback(
+    async (base64: string, imageData: ImageData, landmarks: { x: number; y: number }[]) => {
+      const randomState = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
 
-    login.mutate({ username, imageBase64: faceBase64 }, {
+      const hash = await computeHashK(username, randomState, imageData, landmarks);
+      if (hash) {
+        setHashK(hash);
+      } else {
+        // Antispoof hoặc verify thất bại → reset scanner về idle để user thử lại
+        setBiometricDone(false);
+        setScannerKey(k => k + 1);
+      }
+    },
+    [username, computeHashK]
+  );
+
+  const handleLogin = useCallback((hash: string) => {
+    if (!canProceed || !hash) return;
+
+    login.mutate({ username, hash_k_b64: hash }, {
       onSuccess: () => {
         setUsername("");
-        setFaceBase64(null);
+        setHashK(null);
         setBiometricDone(false);
-        // Để UI vẫn giữ tránh giật lag UI
-        // setStep("username");
         toast.success("Đăng nhập thành công!");
         router.push("/");
       },
       onError: (error: any) => {
         toast.error(error.response?.data?.message || "Xác thực khuôn mặt thất bại. Vui lòng thử lại!");
-        setFaceBase64(null);
+        setHashK(null);
         setBiometricDone(false);
       }
     });
-  };
+  }, [canProceed, username, login, router]);
+
+  // Auto sign-in ngay khi hashK sẵn sàng — không chờ animation kết thúc
+  useEffect(() => {
+    if (hashK && canProceed && !login.isPending) {
+      handleLogin(hashK);
+    }
+  }, [hashK]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
       <Navbar />
 
       <main className="flex-grow flex items-center justify-center px-6 py-20 relative">
-        {/* Ambient glow */}
         <div className="absolute inset-0 biometric-pulse pointer-events-none opacity-60" />
-        {/* bg-primary/5 → kw-brand-soft */}
         <div
           className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-[100px] pointer-events-none"
           style={{ background: "var(--kw-brand-soft)" }}
@@ -91,8 +118,9 @@ export default function LoginPage() {
             <div className="flex gap-1.5">
               <div className="h-1 w-8 rounded-full bg-primary" />
               <div
-                className={`h-1 w-8 rounded-full transition-colors duration-500 ${step === "biometric" ? "bg-primary" : "bg-muted"
-                  }`}
+                className={`h-1 w-8 rounded-full transition-colors duration-500 ${
+                  step === "biometric" ? "bg-primary" : "bg-muted"
+                }`}
               />
             </div>
           </div>
@@ -102,10 +130,11 @@ export default function LoginPage() {
             <div className="relative z-10 space-y-8">
               {/* ── STEP 1: USERNAME ── */}
               <div
-                className={`transition-all duration-500 ${step === "username"
+                className={`transition-all duration-500 ${
+                  step === "username"
                     ? "opacity-100 translate-y-0"
                     : "opacity-0 -translate-y-4 absolute pointer-events-none"
-                  }`}
+                }`}
               >
                 {step === "username" && (
                   <div className="space-y-8">
@@ -135,7 +164,6 @@ export default function LoginPage() {
                           onKeyDown={(e) =>
                             e.key === "Enter" && canProceed && setStep("biometric")
                           }
-                          // border-border → kw-border token
                           className="pl-11 py-6 bg-background text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-primary rounded-xl"
                           style={{ borderColor: "var(--kw-border)" }}
                           autoFocus
@@ -146,7 +174,6 @@ export default function LoginPage() {
                     <Button
                       disabled={!canProceed}
                       onClick={() => setStep("biometric")}
-                      // shadow-primary/20 → kw-brand-glow token
                       className="w-full py-6 rounded-xl btn-brand-gradient font-bold text-base active:scale-95 transition-all border-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2"
                       style={{ boxShadow: "0 10px 30px var(--kw-brand-glow)" }}
                     >
@@ -159,10 +186,11 @@ export default function LoginPage() {
 
               {/* ── STEP 2: BIOMETRIC ── */}
               <div
-                className={`transition-all duration-500 ${step === "biometric"
+                className={`transition-all duration-500 ${
+                  step === "biometric"
                     ? "opacity-100 translate-y-0"
                     : "opacity-0 translate-y-4 absolute pointer-events-none"
-                  }`}
+                }`}
               >
                 {step === "biometric" && (
                   <div className="space-y-8">
@@ -197,21 +225,23 @@ export default function LoginPage() {
                     </div>
 
                     <BiometricScanner
+                      key={scannerKey}
                       mode="login"
                       onSuccess={handleBiometricSuccess}
                       onReset={handleBiometricReset}
-                      onCapture={(base64) => setFaceBase64(base64)}
+                      onCaptureWithData={handleCaptureWithData}
                     />
 
-                    <Button
-                      disabled={!biometricDone || !faceBase64 || !canProceed}
-                      onClick={handleLogin}
-                      // hsl(var(--primary)/0.3) → kw-brand-glow token
-                      className="w-full py-6 rounded-xl btn-brand-gradient font-bold text-base active:scale-95 transition-all border-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:scale-100"
-                      style={{ boxShadow: "0 10px 30px var(--kw-brand-glow)" }}
-                    >
-                      Sign In
-                    </Button>
+                    {/* Status indicator — auto sign-in, không cần bấm button */}
+                    {(wifakeyProcessing || login.isPending) && (
+                      <p className="text-xs text-muted-foreground flex items-center justify-center gap-2">
+                        <Loader2 size={12} className="animate-spin" />
+                        {login.isPending ? "Đang đăng nhập..." : "Đang xác thực sinh trắc học..."}
+                      </p>
+                    )}
+                    {wifakeyError && (
+                      <p className="text-xs text-destructive text-center">{wifakeyError}</p>
+                    )}
                   </div>
                 )}
               </div>
@@ -226,7 +256,6 @@ export default function LoginPage() {
             ].map(({ icon: Icon, label }) => (
               <div
                 key={label}
-                // bg-muted/20 → kw-slate-soft | border-border → kw-border
                 className="px-4 py-2 rounded-full flex items-center gap-2 border"
                 style={{
                   background: "var(--kw-slate-soft)",
@@ -241,7 +270,6 @@ export default function LoginPage() {
             ))}
           </div>
 
-          {/* Footer links */}
           <div className="flex justify-center gap-8 mt-2">
             <Link
               href="/sign-up"
