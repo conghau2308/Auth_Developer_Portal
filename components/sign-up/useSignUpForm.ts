@@ -2,10 +2,7 @@
 
 import { useReducer, useCallback, useState } from "react";
 import { useRegister } from "@/hooks/use-register";
-import { checkLiveness } from "@/lib/wifakey/antispoof";
-import { alignFace, alignFaceWithYuNetKps } from "@/lib/wifakey/face-alignment";
-import { getEmbedding } from "@/lib/wifakey/adaface";
-import { wifakeyEnroll } from "@/lib/wifakey/wifakey-core";
+import { enrollWithNativeApp } from "@/lib/wifakey/native-bridge";
 
 export interface Step1Data {
     fullName: string;
@@ -24,13 +21,11 @@ interface WiFaKeyEnrollResult {
 interface WizardState {
     step: WizardStep;
     step1: Step1Data | null;
-    faceBase64: string | null;       // preview image trong FaceStep
     wifakeyResult: WiFaKeyEnrollResult | null;
 }
 
 type WizardAction =
     | { type: "GO_FACE"; payload: Step1Data }
-    | { type: "SET_FACE"; payload: string }
     | { type: "SET_WIFAKEY"; payload: WiFaKeyEnrollResult }
     | { type: "GO_REVIEW" }
     | { type: "GO_FORM" }
@@ -41,30 +36,19 @@ type WizardAction =
 const initialState: WizardState = {
     step: "form",
     step1: null,
-    faceBase64: null,
     wifakeyResult: null,
 };
 
 function wizardReducer(state: WizardState, action: WizardAction): WizardState {
     switch (action.type) {
-        case "GO_FACE":
-            return { ...state, step: "face", step1: action.payload };
-        case "SET_FACE":
-            return { ...state, faceBase64: action.payload || null };
-        case "SET_WIFAKEY":
-            return { ...state, wifakeyResult: action.payload };
-        case "GO_REVIEW":
-            return { ...state, step: "review" };
-        case "GO_FORM":
-            return { ...state, step: "form" };
-        case "GO_FACE_BACK":
-            return { ...state, step: "face" };
-        case "DONE":
-            return { ...state, step: "done" };
-        case "RESET":
-            return initialState;
-        default:
-            return state;
+        case "GO_FACE":   return { ...state, step: "face", step1: action.payload };
+        case "SET_WIFAKEY": return { ...state, wifakeyResult: action.payload };
+        case "GO_REVIEW": return { ...state, step: "review" };
+        case "GO_FORM":   return { ...state, step: "form" };
+        case "GO_FACE_BACK": return { ...state, step: "face" };
+        case "DONE":      return { ...state, step: "done" };
+        case "RESET":     return initialState;
+        default:          return state;
     }
 }
 
@@ -78,69 +62,30 @@ export function useSignUpForm() {
         dispatch({ type: "GO_FACE", payload: data });
     }, []);
 
-    // Lưu base64 preview khi BiometricScanner capture (dùng onCapture thông thường)
-    const setFaceBase64 = useCallback((base64: string) => {
-        dispatch({ type: "SET_FACE", payload: base64 });
-    }, []);
-
     /**
-     * Nhận un-mirrored ImageData + MediaPipe landmarks từ BiometricScanner.
-     * Chạy toàn bộ WiFaKey enrollment cục bộ — không gửi ảnh hay embedding lên server.
-     * Được gọi qua onCaptureWithData.
+     * Yêu cầu native app mở camera và thực hiện enrollment.
+     * Không cần imageData hay landmarks — native app tự xử lý toàn bộ pipeline.
      */
-    const processEnrollFace = useCallback(
-        async (_base64: string, imageData: ImageData, landmarks: { x: number; y: number }[]) => {
-            setWifakeyProcessing(true);
-            setWifakeyError(null);
-            try {
-                // 1. Anti-spoofing (MiniFAS ONNX)
-                // 1. YuNet detection + MiniFAS anti-spoofing
-                const { isReal, score, detected } = await checkLiveness(imageData, landmarks);
-                if (!isReal) throw new Error(`Phát hiện ảnh giả (score=${score.toFixed(2)}). Vui lòng dùng khuôn mặt thật.`);
-
-                // 2. Align — YuNet kps (đã reorder) nếu detect được, fallback MediaPipe
-                const aligned = detected?.kps
-                    ? alignFaceWithYuNetKps(imageData, detected.kps)
-                    : alignFace(imageData, landmarks);
-                if (!aligned) throw new Error("Không thể căn chỉnh khuôn mặt");
-
-                // 2. AdaFace embedding
-                const embedding = await getEmbedding(aligned);
-
-                // 3. WiFaKey enrollment (fuzzy commitment)
-                const { helperData, maskR, keyHash } = await wifakeyEnroll(embedding);
-
-                // 4. Base64 encode để gửi lên server
-                const toB64 = (arr: Uint8Array) => btoa(String.fromCharCode(...arr));
-                dispatch({
-                    type: "SET_WIFAKEY",
-                    payload: {
-                        helper_data_b64: toB64(helperData),
-                        mask_b64: toB64(maskR),
-                        key_hash_b64: toB64(keyHash),
-                    },
-                });
-                dispatch({ type: "GO_REVIEW" });
-            } catch (e) {
-                setWifakeyError(e instanceof Error ? e.message : "WiFaKey enrollment thất bại");
-            } finally {
-                setWifakeyProcessing(false);
-            }
-        },
-        []
-    );
-
-    const goToReview = useCallback(() => {
-        dispatch({ type: "GO_REVIEW" });
+    const processEnrollFace = useCallback(async () => {
+        setWifakeyProcessing(true);
+        setWifakeyError(null);
+        try {
+            const { helper_data_b64, mask_b64, key_hash_b64 } = await enrollWithNativeApp();
+            dispatch({
+                type: "SET_WIFAKEY",
+                payload: { helper_data_b64, mask_b64, key_hash_b64 },
+            });
+            dispatch({ type: "GO_REVIEW" });
+        } catch (e) {
+            setWifakeyError(e instanceof Error ? e.message : "WiFaKey enrollment thất bại");
+        } finally {
+            setWifakeyProcessing(false);
+        }
     }, []);
 
-    const goToForm = useCallback(() => {
-        dispatch({ type: "GO_FORM" });
-    }, []);
-
-    const goToFaceBack = useCallback(() => {
-        dispatch({ type: "GO_FACE_BACK" });
-    }, []);
+    const goToReview  = useCallback(() => dispatch({ type: "GO_REVIEW" }), []);
+    const goToForm    = useCallback(() => dispatch({ type: "GO_FORM" }), []);
+    const goToFaceBack = useCallback(() => dispatch({ type: "GO_FACE_BACK" }), []);
 
     const submit = useCallback(() => {
         if (!state.step1 || !state.wifakeyResult) return;
@@ -157,9 +102,7 @@ export function useSignUpForm() {
         );
     }, [state.step1, state.wifakeyResult, register]);
 
-    const reset = useCallback(() => {
-        dispatch({ type: "RESET" });
-    }, []);
+    const reset = useCallback(() => dispatch({ type: "RESET" }), []);
 
     return {
         state,
@@ -168,7 +111,6 @@ export function useSignUpForm() {
         wifakeyProcessing,
         wifakeyError,
         goToFace,
-        setFaceBase64,
         processEnrollFace,
         goToReview,
         goToForm,

@@ -66,10 +66,8 @@ export default function SignUpPage() {
     wifakeyProcessing,
     wifakeyError,
     goToFace,
-    goToReview,
     goToForm,
     goToFaceBack,
-    setFaceBase64,
     processEnrollFace,
     submit,
     reset,
@@ -131,12 +129,9 @@ export default function SignUpPage() {
           {state.step === "face" && (
             <FaceStep
               onBack={goToForm}
-              savedBase64={state.faceBase64}
-              onCapture={setFaceBase64}
-              onCaptureWithData={processEnrollFace}
+              onLaunch={processEnrollFace}
               wifakeyProcessing={wifakeyProcessing}
               wifakeyError={wifakeyError}
-              onSuccess={() => {/* processEnrollFace tự dispatch GO_REVIEW sau khi ONNX xong */}}
             />
           )}
 
