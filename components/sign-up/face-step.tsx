@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Fingerprint, Loader2, ShieldAlert, RefreshCw } from "lucide-react";
+import { ArrowLeft, ScanFace, Loader2, ShieldAlert, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FaceStepProps {
@@ -36,7 +36,7 @@ export function FaceStep({ onBack, onLaunch, wifakeyProcessing, wifakeyError }: 
                     ) : wifakeyError ? (
                         <ShieldAlert size={36} style={{ color: "var(--destructive)" }} />
                     ) : (
-                        <Fingerprint size={36} style={{ color: "var(--kw-brand)" }} />
+                        <ScanFace size={36} style={{ color: "var(--kw-brand)" }} />
                     )}
                 </div>
 
@@ -71,7 +71,7 @@ export function FaceStep({ onBack, onLaunch, wifakeyProcessing, wifakeyError }: 
                             className="btn-brand-gradient font-bold px-8 py-5 rounded-xl border-0 gap-2 active:scale-95 transition-all"
                             style={{ boxShadow: "0 8px 24px var(--kw-brand-glow)" }}
                         >
-                            <Fingerprint size={18} />
+                            <ScanFace size={18} />
                             Mở WiFaKey Authenticator
                         </Button>
                     </div>
