@@ -1,10 +1,10 @@
 "use client";
 
-import { Fingerprint, Zap, Code2 } from "lucide-react";
+import { ScanFace, Zap, Code2 } from "lucide-react";
 
 const features = [
     {
-        icon: <Fingerprint size={24} className="text-primary" />,
+        icon: <ScanFace size={24} className="text-primary" />,
         iconBg: "bg-primary/10",
         title: "Unbreakable Security",
         description:

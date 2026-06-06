@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { AtSign, ArrowRight, ChevronRight, ArrowLeft, Loader2, Fingerprint, ShieldAlert } from "lucide-react";
+import { AtSign, ArrowRight, ChevronRight, ArrowLeft, Loader2, ScanFace, ShieldAlert } from "lucide-react";
 import { useLogin } from "@/hooks/use-auth";
 import { useWiFaKeyVerify } from "@/hooks/use-oauth";
 
@@ -141,7 +141,7 @@ export function LoginFlow({ onSuccess, state: oauthState }: LoginFlowProps) {
                                     ) : wifakeyError ? (
                                         <ShieldAlert size={24} style={{ color: "var(--destructive)" }} />
                                     ) : (
-                                        <Fingerprint size={24} style={{ color: "var(--kw-brand)" }} />
+                                        <ScanFace size={24} style={{ color: "var(--kw-brand)" }} />
                                     )}
                                 </div>
                                 {wifakeyProcessing ? (
@@ -164,7 +164,7 @@ export function LoginFlow({ onSuccess, state: oauthState }: LoginFlowProps) {
                                 disabled={wifakeyProcessing || login.isPending}
                                 className={btnPrimary}
                             >
-                                <Fingerprint size={18} />
+                                <ScanFace size={18} />
                                 {wifakeyProcessing || login.isPending ? "Đang xử lý..." : "Mở WiFaKey Authenticator"}
                             </Button>
                         </div>

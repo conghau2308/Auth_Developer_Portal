@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Fingerprint, Twitter, Github } from "lucide-react";
+import { ScanFace, Twitter, Github } from "lucide-react";
 
 export function Footer() {
   return (
@@ -15,7 +15,7 @@ export function Footer() {
           <div className="md:col-span-2 pr-4">
             <Link href="/" className="inline-flex items-center gap-2 mb-5 group">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center group-hover:border-primary/40 group-hover:shadow-[0_0_15px_var(--kw-brand-soft)] transition-all">
-                <Fingerprint size={18} className="text-primary" />
+                <ScanFace size={18} className="text-primary" />
               </div>
               <span className="text-xl font-black text-strong tracking-tight">WiFaKey</span>
             </Link>

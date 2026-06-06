@@ -6,7 +6,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, AtSign, Fingerprint, Lock, Mail, User, Loader2 } from "lucide-react";
+import { ArrowRight, AtSign, ScanFace, Lock, Mail, User, Loader2 } from "lucide-react";
 import type { Step1Data } from "./useSignUpForm";
 import { useCheckUsername, useCheckEmail } from "@/hooks/use-register";
 import { useState } from "react";
@@ -70,7 +70,7 @@ export function RegisterForm({ defaultValues, onNext }: RegisterFormProps) {
     return (
         <div className="bg-card rounded-xl p-8 md:p-10 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none select-none">
-                <Fingerprint size={144} className="text-foreground" />
+                <ScanFace size={144} className="text-foreground" />
             </div>
 
             <div className="relative z-10">
