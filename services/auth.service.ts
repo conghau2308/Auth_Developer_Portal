@@ -2,8 +2,8 @@ import { apiClient } from '@/lib/api-client';
 import { User } from '@/types/api.types';
 
 export const authService = {
-  login: (username: string, hash_k_b64: string) =>
-    apiClient.post('/auth/verify', { username, hash_k_b64 }),
+  login: (username: string, c_prime_b64: string) =>
+    apiClient.post('/auth/verify', { username, c_prime_b64 }),
 
   logout: () => apiClient.post('/auth/logout'),
 

@@ -32,10 +32,10 @@ export const useAuthorize = (onConsentRequired: (scopes: string[]) => void) => {
 };
 
 /**
- * Hook để lấy hash_k từ native app thay vì xử lý ONNX trong browser:
+ * Hook để lấy c' (noisy codeword) từ native app thay vì xử lý ONNX trong browser:
  * 1. Tải δ (helper_data + mask) từ server
- * 2. Gửi sang native app qua WebSocket → app mở camera, chạy pipeline
- * 3. Nhận hash_k_b64 → trả về caller
+ * 2. Gửi sang native app qua WebSocket → app mở camera, chạy pipeline đến bước XOR
+ * 3. Nhận c_prime_b64 → trả về caller (IdP sẽ tự decode LDPC + tái tạo khoá)
  *
  * c*, k và ảnh khuôn mặt không bao giờ rời native process.
  */
@@ -43,7 +43,7 @@ export function useWiFaKeyVerify() {
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const computeHashK = useCallback(
+    const computeCPrime = useCallback(
         async (username: string, state: string): Promise<string | null> => {
             setProcessing(true);
             setError(null);
@@ -51,12 +51,12 @@ export function useWiFaKeyVerify() {
                 // 1. Lấy δ từ server
                 const delta = await oauthService.getDelta(username, state);
 
-                // 2. Native app xử lý camera → LDPC decode → trả hash_k
-                const hash_k_b64 = await verifyWithNativeApp(
+                // 2. Native app xử lý camera → XOR với δ → trả c'
+                const c_prime_b64 = await verifyWithNativeApp(
                     delta.helper_data_b64,
                     delta.mask_b64,
                 );
-                return hash_k_b64;
+                return c_prime_b64;
             } catch (e) {
                 setError(e instanceof Error ? e.message : 'WiFaKey verify thất bại');
                 return null;
@@ -69,7 +69,7 @@ export function useWiFaKeyVerify() {
 
     const clearError = useCallback(() => setError(null), []);
 
-    return { computeHashK, processing, error, clearError };
+    return { computeCPrime, processing, error, clearError };
 }
 
 export const useAuthorizeConsent = () => {

@@ -24,7 +24,7 @@ export default function LoginPage() {
   const canProceed = username.trim().length > 0;
   const login = useLogin();
   const router = useRouter();
-  const { computeHashK, processing: wifakeyProcessing, error: wifakeyError, clearError } = useWiFaKeyVerify();
+  const { computeCPrime, processing: wifakeyProcessing, error: wifakeyError, clearError } = useWiFaKeyVerify();
 
   const handleBiometricReset = useCallback(() => {
     clearError();
@@ -36,9 +36,9 @@ export default function LoginPage() {
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    const hash = await computeHashK(username, randomState);
-    if (hash) {
-      login.mutate({ username, hash_k_b64: hash }, {
+    const cPrime = await computeCPrime(username, randomState);
+    if (cPrime) {
+      login.mutate({ username, c_prime_b64: cPrime }, {
         onSuccess: () => {
           toast.success("Đăng nhập thành công!");
           router.push("/");
@@ -48,7 +48,7 @@ export default function LoginPage() {
         },
       });
     }
-  }, [canProceed, username, computeHashK, login, router]);
+  }, [canProceed, username, computeCPrime, login, router]);
 
   const btnPrimary = [
     "w-full py-6 rounded-xl font-bold text-base",

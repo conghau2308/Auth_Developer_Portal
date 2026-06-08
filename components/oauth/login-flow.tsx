@@ -22,7 +22,7 @@ export function LoginFlow({ onSuccess, state: oauthState }: LoginFlowProps) {
 
     const canProceed = username.trim().length > 0;
     const login = useLogin();
-    const { computeHashK, processing: wifakeyProcessing, error: wifakeyError, clearError } = useWiFaKeyVerify();
+    const { computeCPrime, processing: wifakeyProcessing, error: wifakeyError, clearError } = useWiFaKeyVerify();
 
     const handleBiometricReset = useCallback(() => {
         clearError();
@@ -36,11 +36,11 @@ export function LoginFlow({ onSuccess, state: oauthState }: LoginFlowProps) {
             .map((b) => b.toString(16).padStart(2, "0"))
             .join("");
 
-        const hash = await computeHashK(username, state);
-        if (!hash) return;
+        const cPrime = await computeCPrime(username, state);
+        if (!cPrime) return;
 
-        login.mutate({ username, hash_k_b64: hash }, { onSuccess });
-    }, [canProceed, username, oauthState, computeHashK, login, onSuccess]);
+        login.mutate({ username, c_prime_b64: cPrime }, { onSuccess });
+    }, [canProceed, username, oauthState, computeCPrime, login, onSuccess]);
 
     const btnPrimary = [
         "w-full py-6 rounded-xl font-bold text-base",

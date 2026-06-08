@@ -111,16 +111,17 @@ export async function enrollWithNativeApp(): Promise<NativeEnrollResult> {
 
 /**
  * Yêu cầu native app verify khuôn mặt với δ đã có.
- * Trả về hash_k_b64 để gửi lên IdP.
+ * Trả về c_prime_b64 (noisy codeword c' = b_selected ⊕ helper_data) để
+ * gửi lên IdP — IdP sẽ tự decode LDPC + tái tạo khoá phía server.
  */
 export async function verifyWithNativeApp(
   helper_data_b64: string,
   mask_b64: string
 ): Promise<string> {
-  const r = await wsRequest<{ ok: boolean; hash_k_b64: string }>(
+  const r = await wsRequest<{ ok: boolean; c_prime_b64: string }>(
     { action: "verify", helper_data_b64, mask_b64 },
     90_000
   );
-  if (!r.ok || !r.hash_k_b64) throw new Error("Xác thực khuôn mặt thất bại.");
-  return r.hash_k_b64;
+  if (!r.ok || !r.c_prime_b64) throw new Error("Xác thực khuôn mặt thất bại.");
+  return r.c_prime_b64;
 }

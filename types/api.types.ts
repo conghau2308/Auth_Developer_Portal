@@ -34,7 +34,7 @@ export interface DeltaResponseDto {
 // ========== AUTH TYPES ==========
 export interface LoginDTO {
   username: string;
-  hash_k_b64: string;
+  c_prime_b64: string;
 }
 
 export interface LoginResponse {
