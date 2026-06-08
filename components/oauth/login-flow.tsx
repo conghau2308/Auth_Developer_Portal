@@ -4,42 +4,49 @@ import { useCallback, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { AtSign, ArrowRight, ChevronRight, ArrowLeft, Loader2 } from "lucide-react";
-import { BiometricScanner } from "@/components/layout/biometric-scanner";
+import { AtSign, ArrowRight, ChevronRight, ArrowLeft, Loader2, ScanFace, ShieldAlert } from "lucide-react";
 import { useLogin } from "@/hooks/use-auth";
+import { useWiFaKeyVerify } from "@/hooks/use-oauth";
 
 type LoginStep = "username" | "biometric";
 
 interface LoginFlowProps {
     onSuccess: () => void;
+    /** OAuth state param — dùng để getDelta. Nếu không có sẽ dùng random state. */
+    state?: string;
 }
 
-export function LoginFlow({ onSuccess }: LoginFlowProps) {
+export function LoginFlow({ onSuccess, state: oauthState }: LoginFlowProps) {
     const [step, setStep] = useState<LoginStep>("username");
     const [username, setUsername] = useState("");
-    const [biometricDone, setBiometricDone] = useState(false);
-    const [faceBase64, setFaceBase64] = useState<string | null>(null);
 
     const canProceed = username.trim().length > 0;
     const login = useLogin();
+    const { computeCPrime, processing: wifakeyProcessing, error: wifakeyError, clearError } = useWiFaKeyVerify();
 
-    const handleBiometricSuccess = useCallback(() => setBiometricDone(true), []);
     const handleBiometricReset = useCallback(() => {
-        setBiometricDone(false);
-        setFaceBase64(null);
-    }, []);
+        clearError();
+    }, [clearError]);
 
-    const handleLogin = () => {
-        if (!canProceed || !faceBase64 || !biometricDone) return;
-        login.mutate({ username, imageBase64: faceBase64 }, { onSuccess });
-    };
+    const handleLaunchAuthenticator = useCallback(async () => {
+        if (!canProceed) return;
 
-    // Class dùng lại trong component này (Button CTA xuất hiện 2 lần)
+        // Dùng OAuth state nếu có, không thì random (cho direct login)
+        const state = oauthState ?? Array.from(crypto.getRandomValues(new Uint8Array(16)))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+
+        const cPrime = await computeCPrime(username, state);
+        if (!cPrime) return;
+
+        login.mutate({ username, c_prime_b64: cPrime }, { onSuccess });
+    }, [canProceed, username, oauthState, computeCPrime, login, onSuccess]);
+
     const btnPrimary = [
         "w-full py-6 rounded-xl font-bold text-base",
         "flex items-center justify-center gap-2",
         "active:scale-95 transition-all border-0",
-        "btn-brand-gradient",                          // gradient + hover — đã có trong globals
+        "btn-brand-gradient",
         "shadow-[0_10px_30px_hsl(var(--primary)/0.3)]",
         "disabled:opacity-30 disabled:cursor-not-allowed disabled:!translate-y-0 disabled:!shadow-none",
     ].join(" ");
@@ -77,7 +84,6 @@ export function LoginFlow({ onSuccess }: LoginFlowProps) {
                                 <h1 className="text-2xl font-extrabold tracking-tight text-[var(--kw-text-strong)]">Đăng nhập</h1>
                                 <p className="text-sm text-[var(--kw-text-muted)]">Nhập username để tiếp tục xác thực khuôn mặt.</p>
                             </div>
-
                             <div className="space-y-2">
                                 <Label className="text-[11px] font-bold uppercase tracking-widest text-[var(--kw-text-muted)] ml-1">
                                     Tên đăng nhập
@@ -95,24 +101,19 @@ export function LoginFlow({ onSuccess }: LoginFlowProps) {
                                     />
                                 </div>
                             </div>
-
                             <Button disabled={!canProceed} onClick={() => setStep("biometric")} className={btnPrimary}>
                                 Tiếp tục <ArrowRight size={18} />
                             </Button>
                         </div>
                     )}
 
-                    {/* Step 2 — Biometric */}
+                    {/* Step 2 — Biometric (native app) */}
                     {step === "biometric" && (
-                        <div className="space-y-8">
+                        <div className="space-y-6">
                             <div className="space-y-1">
                                 <div className="flex items-center">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => setStep("username")}
-                                        className="flex items-center gap-1.5 cursor-pointer"
-                                    >
+                                    <Button variant="ghost" size="sm" onClick={() => { setStep("username"); handleBiometricReset(); }}
+                                        className="flex items-center gap-1.5 cursor-pointer">
                                         <ArrowLeft size={20} />
                                     </Button>
                                     <h1 className="text-2xl font-extrabold tracking-tight text-[var(--kw-text-strong)]">
@@ -121,33 +122,53 @@ export function LoginFlow({ onSuccess }: LoginFlowProps) {
                                 </div>
                                 <p className="text-sm text-[var(--kw-text-muted)]">
                                     Đăng nhập với{" "}
-                                    <Button
-                                        onClick={() => { setStep("username"); handleBiometricReset(); }}
-                                        className="font-semibold inline-flex items-center gap-0.5 text-[var(--kw-brand)] hover:opacity-75 hover:underline cursor-pointer transition-opacity"
-                                    >
+                                    <Button onClick={() => { setStep("username"); handleBiometricReset(); }}
+                                        className="font-semibold inline-flex items-center gap-0.5 text-[var(--kw-brand)] hover:opacity-75 hover:underline cursor-pointer transition-opacity">
                                         @{username} <ChevronRight size={12} />
                                     </Button>
                                 </p>
                             </div>
 
-                            <BiometricScanner
-                                onSuccess={handleBiometricSuccess}
-                                onReset={handleBiometricReset}
-                                onCapture={(base64) => setFaceBase64(base64)}
-                            />
+                            {/* Authenticator status */}
+                            <div className="flex flex-col items-center gap-3 py-2">
+                                <div className="w-14 h-14 rounded-full flex items-center justify-center border-2"
+                                    style={{
+                                        background: "var(--kw-brand-soft)",
+                                        borderColor: wifakeyError ? "var(--destructive)" : "var(--kw-border-glow)",
+                                    }}>
+                                    {wifakeyProcessing || login.isPending ? (
+                                        <Loader2 size={24} className="animate-spin" style={{ color: "var(--kw-brand)" }} />
+                                    ) : wifakeyError ? (
+                                        <ShieldAlert size={24} style={{ color: "var(--destructive)" }} />
+                                    ) : (
+                                        <ScanFace size={24} style={{ color: "var(--kw-brand)" }} />
+                                    )}
+                                </div>
+                                {wifakeyProcessing ? (
+                                    <p className="text-xs text-center text-[var(--kw-text-muted)]">
+                                        Đang chờ WiFaKey Authenticator…<br />Nhìn vào camera trong cửa sổ vừa mở.
+                                    </p>
+                                ) : login.isPending ? (
+                                    <p className="text-xs text-center text-[var(--kw-text-muted)]">Đang đăng nhập...</p>
+                                ) : wifakeyError ? (
+                                    <p className="text-xs text-center text-destructive">{wifakeyError}</p>
+                                ) : (
+                                    <p className="text-xs text-center text-[var(--kw-text-muted)]">
+                                        Nhấn nút bên dưới — ứng dụng WiFaKey sẽ mở cửa sổ quét khuôn mặt.
+                                    </p>
+                                )}
+                            </div>
 
                             <Button
-                                disabled={!biometricDone || !faceBase64 || login.isPending}
-                                onClick={handleLogin}
+                                onClick={handleLaunchAuthenticator}
+                                disabled={wifakeyProcessing || login.isPending}
                                 className={btnPrimary}
                             >
-                                {login.isPending
-                                    ? <><Loader2 size={18} className="animate-spin" /> Đang xác thực…</>
-                                    : "Đăng nhập"}
+                                <ScanFace size={18} />
+                                {wifakeyProcessing || login.isPending ? "Đang xử lý..." : "Mở WiFaKey Authenticator"}
                             </Button>
                         </div>
                     )}
-
                 </div>
             </div>
         </div>

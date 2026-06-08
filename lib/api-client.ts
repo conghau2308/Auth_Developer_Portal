@@ -1,12 +1,13 @@
 import axios, { AxiosInstance } from 'axios';
+import { toast } from 'sonner';
 import { queryClient } from './query-client';
 
 interface ApiClient extends Omit<AxiosInstance, 'get' | 'post' | 'put' | 'delete' | 'patch'> {
-  get<T = any>(url: string, config?: object): Promise<T>;
-  post<T = any>(url: string, data?: any, config?: object): Promise<T>;
-  put<T = any>(url: string, data?: any, config?: object): Promise<T>;
-  delete<T = any>(url: string, config?: object): Promise<T>;
-  patch<T = any>(url: string, data?: any, config?: object): Promise<T>;
+  get<T = unknown>(url: string, config?: object): Promise<T>;
+  post<T = unknown>(url: string, data?: unknown, config?: object): Promise<T>;
+  put<T = unknown>(url: string, data?: unknown, config?: object): Promise<T>;
+  delete<T = unknown>(url: string, config?: object): Promise<T>;
+  patch<T = unknown>(url: string, data?: unknown, config?: object): Promise<T>;
 }
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -51,6 +52,16 @@ _apiClient.interceptors.response.use(
 
     if (error.response?.status === 403) {
       queryClient.setQueryData(['auth', 'me'], null);
+    }
+
+    if (error.response?.status === 429) {
+      const retryAfterHeader = error.response.headers?.['retry-after'];
+      const parsed = retryAfterHeader ? parseInt(retryAfterHeader, 10) : 60;
+      const seconds = isNaN(parsed) ? 60 : parsed;
+      toast.error(`Quá nhiều yêu cầu. Thử lại sau ${seconds} giây.`, {
+        duration: 2000,
+        id: 'rate-limit',
+      });
     }
 
     // ✅ BỎ HOÀN TOÀN block isSkipUrl redirect ở interceptor

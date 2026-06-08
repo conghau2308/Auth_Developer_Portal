@@ -1,60 +1,93 @@
 "use client";
 
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ScanFace, Loader2, ShieldAlert, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BiometricScanner } from "@/components/layout/biometric-scanner";
 
 interface FaceStepProps {
     onBack: () => void;
-    onSuccess: () => void;
-    savedBase64?: string | null;
-    onCapture?: (base64: string) => void;
+    onLaunch: () => void;
+    wifakeyProcessing?: boolean;
+    wifakeyError?: string | null;
 }
 
-export function FaceStep({ onBack, onSuccess, savedBase64, onCapture }: FaceStepProps) {
+export function FaceStep({ onBack, onLaunch, wifakeyProcessing, wifakeyError }: FaceStepProps) {
     return (
         <div className="bg-cyan-40 dark:bg-cyan-950/90 border border-cyan-200/40 dark:border-cyan-800/40 rounded-xl p-8 md:p-10 shadow-2xl">
-            <header className="mb-2">
+            <header className="mb-6">
                 <h1 className="text-2xl font-extrabold tracking-tight text-cyan-900 dark:text-cyan-100">
                     Face Enrollment
                 </h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                    WiFaKey Authenticator sẽ mở camera trên máy tính của bạn.
+                </p>
             </header>
 
-            <BiometricScanner
-                mode="signup"
-                initialImage={savedBase64}
-                onCapture={(base64) => {
-                    onCapture?.(base64);
-                }}
-                onSuccess={() => {
-                    // tự động chuyển review sau khi scan xong
-                    onSuccess();
-                }}
-                onReset={() => {
-                    onCapture?.('');
-                }}
-            />
+            {/* Authenticator launch area */}
+            <div className="flex flex-col items-center gap-5 py-6">
+                <div
+                    className="w-20 h-20 rounded-full flex items-center justify-center border-2"
+                    style={{
+                        background: "var(--kw-brand-soft)",
+                        borderColor: wifakeyError ? "var(--destructive)" : "var(--kw-border-glow)",
+                    }}
+                >
+                    {wifakeyProcessing ? (
+                        <Loader2 size={36} className="animate-spin" style={{ color: "var(--kw-brand)" }} />
+                    ) : wifakeyError ? (
+                        <ShieldAlert size={36} style={{ color: "var(--destructive)" }} />
+                    ) : (
+                        <ScanFace size={36} style={{ color: "var(--kw-brand)" }} />
+                    )}
+                </div>
 
-            <div className="mt-6 flex items-center justify-between">
+                {wifakeyProcessing ? (
+                    <div className="text-center">
+                        <p className="text-sm font-semibold text-foreground">
+                            Đang chờ WiFaKey Authenticator…
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Nhìn vào camera trong cửa sổ vừa mở trên máy tính của bạn.
+                        </p>
+                    </div>
+                ) : wifakeyError ? (
+                    <div className="text-center space-y-3">
+                        <p className="text-sm text-destructive font-medium">{wifakeyError}</p>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={onLaunch}
+                            className="gap-2"
+                        >
+                            <RefreshCw size={14} /> Thử lại
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="text-center space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                            Nhấn nút bên dưới — ứng dụng WiFaKey sẽ mở cửa sổ quét khuôn mặt.
+                        </p>
+                        <Button
+                            onClick={onLaunch}
+                            className="btn-brand-gradient font-bold px-8 py-5 rounded-xl border-0 gap-2 active:scale-95 transition-all"
+                            style={{ boxShadow: "0 8px 24px var(--kw-brand-glow)" }}
+                        >
+                            <ScanFace size={18} />
+                            Mở WiFaKey Authenticator
+                        </Button>
+                    </div>
+                )}
+            </div>
+
+            <div className="mt-4 flex items-center justify-between">
                 <Button
                     variant="ghost"
                     className="flex items-center gap-2 text-cyan-700/70 hover:text-cyan-900 hover:bg-cyan-100/50 text-sm"
                     onClick={onBack}
+                    disabled={wifakeyProcessing}
                 >
                     <ArrowLeft size={15} />
                     Back to form
                 </Button>
-
-                {/* Chỉ hiện khi đã có ảnh — cho phép review mà không cần scan lại */}
-                {savedBase64 && (
-                    <Button
-                        className="flex items-center gap-2 rounded-xl text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 text-cyan-900 border-0 transition-all active:scale-[0.97]"
-                        onClick={onSuccess}
-                    >
-                        Review & confirm
-                        <ArrowRight size={15} />
-                    </Button>
-                )}
             </div>
         </div>
     );

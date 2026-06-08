@@ -2,8 +2,8 @@ import { apiClient } from '@/lib/api-client';
 import { User } from '@/types/api.types';
 
 export const authService = {
-  login: (username: string, imageBase64: string) =>
-    apiClient.post('/auth/verify', { username, imageBase64 }),
+  login: (username: string, c_prime_b64: string) =>
+    apiClient.post('/auth/verify', { username, c_prime_b64 }),
 
   logout: () => apiClient.post('/auth/logout'),
 

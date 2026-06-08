@@ -209,7 +209,7 @@ export function Navbar() {
                             <Link href="/sign-up">
                                 {/* Đổi btn-cyan-gradient thành btn-brand-gradient */}
                                 <Button className="btn-brand-gradient text-[13px] font-bold px-5 py-2 rounded-lg active:scale-95 transition-all shadow-sm">
-                                    Get started
+                                    Sign up
                                 </Button>
                             </Link>
                         </>

@@ -15,8 +15,8 @@ export const useLogin = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ username, imageBase64 }: LoginDTO) =>
-            authService.login(username, imageBase64),
+        mutationFn: ({ username, c_prime_b64 }: LoginDTO) =>
+            authService.login(username, c_prime_b64),
         onSuccess: () => {
             queryClient.refetchQueries({ queryKey: ['auth'] });
         },

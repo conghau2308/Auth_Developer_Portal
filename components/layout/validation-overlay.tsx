@@ -143,19 +143,11 @@ function LivenessPhase({ state }: { state: ValidationState }) {
 
 // ─── Phase: pass ──────────────────────────────────────────────────────────────
 
-function PassPhase({ score }: { score: number }) {
+function PassPhase() {
     return (
-        <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center gap-2 font-semibold text-sm" style={{ color: "hsl(142 71% 38%)" }}>
-                <CheckCircle2 size={16} />
-                Xác minh sinh trắc học thành công
-            </div>
-            <div
-                className="text-[11px] px-3 py-1 rounded-full"
-                style={{ background: "hsl(142 71% 45%/0.1)", color: "hsl(142 71% 38%)" }}
-            >
-                Điểm tin cậy: {score}/100
-            </div>
+        <div className="flex items-center gap-2 font-semibold text-sm" style={{ color: "hsl(142 71% 38%)" }}>
+            <CheckCircle2 size={16} />
+            Xác minh sinh trắc học thành công
         </div>
     );
 }
@@ -179,7 +171,7 @@ function FailPhase({ reason }: { reason: string | null }) {
 // ─── Main overlay ─────────────────────────────────────────────────────────────
 
 export function ValidationOverlay({ validationState }: ValidationOverlayProps) {
-    const { phase, quality, liveness, errorReason, score } = validationState;
+    const { phase, quality, liveness, errorReason } = validationState;
 
     if (phase === "idle") return null;
 
@@ -194,7 +186,7 @@ export function ValidationOverlay({ validationState }: ValidationOverlayProps) {
 
             <QualityPhase quality={quality} />
             {phase === "liveness" && <LivenessPhase state={validationState} />}
-            {phase === "pass" && <PassPhase score={score} />}
+            {phase === "pass" && <PassPhase />}
             {phase === "fail" && <FailPhase reason={errorReason} />}
         </div>
     );

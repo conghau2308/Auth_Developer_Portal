@@ -106,7 +106,7 @@ export default function OAuthAuthorizeContent() {
 
       {/* Chưa đăng nhập → form login, sau login gọi authorize luôn */}
       {resolvedScreen === "login" && (
-        <LoginFlow onSuccess={handleLoginSuccess} />
+        <LoginFlow onSuccess={handleLoginSuccess} state={state} />
       )}
 
       {/* Đã đăng nhập → chọn account, sau đó gọi authorize */}

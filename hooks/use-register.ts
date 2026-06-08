@@ -8,6 +8,10 @@ export const useCheckUsername = () => useMutation({
     mutationFn: (username: string) => registerService.checkUsername(username),
 });
 
+export const useCheckEmail = () => useMutation({
+    mutationFn: (email: string) => registerService.checkEmail(email),
+});
+
 export const useRegister = () => {
     const router = useRouter();
 
