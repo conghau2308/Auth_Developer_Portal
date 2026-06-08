@@ -10,6 +10,7 @@ import {
   ChevronRight, ArrowLeft, Loader2, ScanFace, ShieldAlert,
 } from "lucide-react";
 import { useLogin } from "@/hooks/use-auth";
+import { useCheckUsername } from "@/hooks/use-register";
 import { useWiFaKeyVerify } from "@/hooks/use-oauth";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
@@ -20,15 +21,32 @@ type Step = "username" | "biometric";
 export default function LoginPage() {
   const [step, setStep] = useState<Step>("username");
   const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState<string | null>(null);
 
   const canProceed = username.trim().length > 0;
   const login = useLogin();
   const router = useRouter();
   const { computeCPrime, processing: wifakeyProcessing, error: wifakeyError, clearError } = useWiFaKeyVerify();
+  const checkUsername = useCheckUsername();
 
   const handleBiometricReset = useCallback(() => {
     clearError();
   }, [clearError]);
+
+  const handleContinue = useCallback(async () => {
+    if (!canProceed || checkUsername.isPending) return;
+    setUsernameError(null);
+    try {
+      const res = await checkUsername.mutateAsync(username.trim()) as { available: boolean };
+      if (res.available) {
+        setUsernameError("Tài khoản chưa được đăng ký.");
+        return;
+      }
+      setStep("biometric");
+    } catch {
+      setUsernameError("Không thể kiểm tra tài khoản, vui lòng thử lại.");
+    }
+  }, [canProceed, checkUsername, username]);
 
   const handleLaunchAuthenticator = useCallback(async () => {
     if (!canProceed) return;
@@ -104,16 +122,23 @@ export default function LoginPage() {
                         type="text"
                         placeholder="your_username"
                         value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && canProceed && setStep("biometric")}
+                        onChange={(e) => { setUsername(e.target.value); setUsernameError(null); }}
+                        onKeyDown={(e) => e.key === "Enter" && handleContinue()}
                         className="pl-11 py-6 bg-background text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-primary rounded-xl"
-                        style={{ borderColor: "var(--kw-border)" }}
+                        style={{ borderColor: usernameError ? "var(--destructive)" : "var(--kw-border)" }}
                         autoFocus
                       />
                     </div>
+                    {usernameError && (
+                      <p className="text-xs text-red-500 ml-1">{usernameError}</p>
+                    )}
                   </div>
-                  <Button disabled={!canProceed} onClick={() => setStep("biometric")} className={btnPrimary}>
-                    Continue to Face Scan <ArrowRight size={18} />
+                  <Button disabled={!canProceed || checkUsername.isPending} onClick={handleContinue} className={btnPrimary}>
+                    {checkUsername.isPending ? (
+                      <>Đang kiểm tra... <Loader2 size={18} className="animate-spin" /></>
+                    ) : (
+                      <>Continue to Face Scan <ArrowRight size={18} /></>
+                    )}
                   </Button>
                 </div>
               )}
